@@ -1,0 +1,1035 @@
+<title>SRM StudyMate AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: study-desk app — left rail of learning modes, a work surface on the right; notes are "ink", citations are "highlighter" */
+:root{
+  --bg:#eef1f6; --surface:#ffffff; --sunk:#f6f8fb; --ink:#152036; --muted:#5a6680; --line:#d9dfe9;
+  --accent:#1d4ed8; --accent-ink:#ffffff; --accent-soft:#e3ebff;
+  --mark:#f4cf4a; --mark-soft:#fdf3c8; --mark-ink:#4a3a00;
+  --good:#17845a; --good-soft:#dcf3e8; --warn:#b86e0b; --warn-soft:#fbecd3; --bad:#c03a34; --bad-soft:#fbe1df;
+  --violet:#6d4bd8; --violet-soft:#ece6ff;
+  --shadow:0 1px 2px rgba(21,32,54,.06),0 6px 20px -8px rgba(21,32,54,.18);
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"Source Sans 3","Segoe UI",system-ui,-apple-system,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0c1120; --surface:#141b2d; --sunk:#10172a; --ink:#e6ebf5; --muted:#95a1b9; --line:#25304a;
+  --accent:#7ea2ff; --accent-ink:#0c1120; --accent-soft:#1c2950;
+  --mark:#e2b93a; --mark-soft:#3a3214; --mark-ink:#f6e3a1;
+  --good:#45c08a; --good-soft:#123527; --warn:#e7a43f; --warn-soft:#3a2a10; --bad:#f07068; --bad-soft:#3d1a19;
+  --violet:#a891ff; --violet-soft:#2a2150;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -10px rgba(0,0,0,.6); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c1120; --surface:#141b2d; --sunk:#10172a; --ink:#e6ebf5; --muted:#95a1b9; --line:#25304a;
+  --accent:#7ea2ff; --accent-ink:#0c1120; --accent-soft:#1c2950;
+  --mark:#e2b93a; --mark-soft:#3a3214; --mark-ink:#f6e3a1;
+  --good:#45c08a; --good-soft:#123527; --warn:#e7a43f; --warn-soft:#3a2a10; --bad:#f07068; --bad-soft:#3d1a19;
+  --violet:#a891ff; --violet-soft:#2a2150;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -10px rgba(0,0,0,.6); color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--f-body);font-size:15.5px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--f-display);line-height:1.15;text-wrap:balance;margin:0}
+.mono{font-family:var(--f-mono);font-size:.82em}
+.eyebrow{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+/* shell */
+.app{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100vh}
+.rail{position:sticky;top:env(safe-area-inset-top,0px);height:100vh;display:flex;flex-direction:column;gap:22px;padding:22px 16px;border-right:1px solid var(--line);background:var(--surface)}
+.brand{display:flex;align-items:center;gap:10px;padding:0 6px}
+.brand-mark{width:34px;height:34px;border-radius:9px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink);flex:none}
+.brand b{font-family:var(--f-display);font-size:19px;font-weight:800;letter-spacing:-.01em;display:block;line-height:1}
+.brand small{font-family:var(--f-mono);font-size:10.5px;color:var(--muted);letter-spacing:.06em}
+.nav{display:flex;flex-direction:column;gap:3px}
+.nav button{all:unset;cursor:pointer;display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:9px;color:var(--muted);font-weight:600}
+.nav button svg{width:18px;height:18px;flex:none}
+.nav button:hover{background:var(--sunk);color:var(--ink)}
+.nav button[aria-current="page"]{background:var(--accent-soft);color:var(--accent)}
+.nav .count{margin-left:auto;font-family:var(--f-mono);font-size:11px;background:var(--mark);color:#3d3000;border-radius:999px;padding:1px 7px}
+.rail-foot{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+.ai-pill{display:flex;align-items:center;gap:8px;font-size:13px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--sunk)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.dot.on{background:var(--good);box-shadow:0 0 0 3px var(--good-soft)}
+.dot.off{background:var(--warn);box-shadow:0 0 0 3px var(--warn-soft)}
+main{padding-block:28px 60px;padding-inline:clamp(16px,3.5vw,44px);min-width:0;max-width:1180px;width:100%}
+.view{display:flex;flex-direction:column;gap:22px}
+.view-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+.view-head h1{font-size:clamp(26px,3.2vw,34px);font-weight:800;letter-spacing:-.02em}
+.view-head p{margin:6px 0 0;color:var(--muted);max-width:62ch}
+
+/* surfaces */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}
+.card.raised{box-shadow:var(--shadow)}
+.card h2{font-size:17px;font-weight:700}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.grid{display:grid;gap:16px}
+.g-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g-dash{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr)}
+.g-lib{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr)}
+
+/* controls */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 14px;font-weight:600;cursor:pointer;line-height:1.2;white-space:nowrap}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+.btn.ghost:hover{color:var(--ink);background:var(--sunk)}
+.btn.sm{padding:5px 10px;font-size:13.5px;border-radius:8px}
+.btn.danger{color:var(--bad)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn svg{width:16px;height:16px}
+label.field{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600;color:var(--muted);min-width:0}
+input[type=text],select,textarea{width:100%;border:1px solid var(--line);background:var(--sunk);border-radius:9px;padding:8px 10px;color:var(--ink);font-weight:400;font-size:14.5px}
+textarea{resize:vertical;min-height:110px;line-height:1.45}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.row>*{flex:1 1 140px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{all:unset;cursor:pointer;font-size:13px;font-weight:600;padding:5px 11px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:var(--surface)}
+.chip:hover{color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.switch{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;cursor:pointer;color:var(--muted)}
+.switch input{appearance:none;width:34px;height:20px;border-radius:999px;background:var(--line);position:relative;cursor:pointer;transition:background .2s;flex:none;margin:0}
+.switch input::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.switch input:checked{background:var(--violet)}
+.switch input:checked::after{transform:translateX(14px)}
+.badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:6px;background:var(--sunk);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.badge.ex{background:var(--mark-soft);border-color:transparent;color:var(--mark-ink)}
+.badge.good{background:var(--good-soft);color:var(--good);border-color:transparent}
+.badge.warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.badge.bad{background:var(--bad-soft);color:var(--bad);border-color:transparent}
+.badge.violet{background:var(--violet-soft);color:var(--violet);border-color:transparent}
+.badge.acc{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;font-size:14px;z-index:50;box-shadow:var(--shadow);max-width:calc(100vw - 32px)}
+.notice{font-size:13.5px;padding:10px 12px;border-radius:10px;background:var(--mark-soft);color:var(--mark-ink);display:flex;gap:10px;align-items:flex-start}
+.notice.info{background:var(--accent-soft);color:var(--ink)}
+.empty{padding:26px 16px;text-align:center;color:var(--muted);font-size:14px;border:1px dashed var(--line);border-radius:12px}
+
+/* dashboard */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center;background:var(--ink);color:var(--bg);border-radius:16px;padding:22px 24px;position:relative;overflow:hidden}
+.hero h1{font-size:clamp(24px,3vw,32px);font-weight:800;letter-spacing:-.02em}
+.hero p{margin:6px 0 0;opacity:.8;max-width:56ch}
+.hero .next{display:flex;flex-direction:column;gap:8px;align-items:flex-start;min-width:0}
+.hero .btn.primary{background:var(--mark);border-color:var(--mark);color:#2e2400}
+.hero::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;border:28px solid var(--mark);opacity:.12;pointer-events:none}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.stat b{font-family:var(--f-display);font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat span{font-size:12.5px;color:var(--muted)}
+.mastery{display:flex;flex-direction:column;gap:2px}
+.m-row{display:grid;grid-template-columns:minmax(0,1fr) 120px 46px auto;gap:12px;align-items:center;padding:8px 6px;border-radius:9px}
+.m-row:hover{background:var(--sunk)}
+.m-name{min-width:0}
+.m-name b{display:block;font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m-name small{color:var(--muted);font-size:12px}
+.bar{height:8px;border-radius:999px;background:var(--sunk);border:1px solid var(--line);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:999px;background:var(--good);transition:width .5s}
+.bar i.mid{background:var(--warn)} .bar i.low{background:var(--bad)}
+.m-pct{font-family:var(--f-mono);font-size:12.5px;text-align:right}
+.m-act{display:flex;gap:4px}
+.cycle{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px;font-weight:600}
+.cycle span{padding:5px 10px;border-radius:999px;background:var(--good-soft);color:var(--good)}
+.cycle span.now{background:var(--good);color:var(--surface)}
+.cycle em{font-style:normal;color:var(--muted)}
+.log{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.log li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;font-size:14px;align-items:start}
+.log time{font-family:var(--f-mono);font-size:11.5px;color:var(--muted);padding-top:2px;min-width:52px}
+
+/* library */
+.drop{border:1.5px dashed var(--line);border-radius:12px;padding:18px;text-align:center;background:var(--sunk);cursor:pointer;transition:border-color .2s,background .2s}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop b{display:block;font-size:14.5px}
+.drop small{color:var(--muted)}
+.pipe{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:4px}
+.pstep{border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--sunk);min-width:0;position:relative}
+.pstep .eyebrow{font-size:10px}
+.pstep b{display:block;font-family:var(--f-display);font-size:18px;font-variant-numeric:tabular-nums}
+.pstep.done{border-color:var(--good);background:var(--good-soft)}
+.pstep.run{border-color:var(--accent);background:var(--accent-soft)}
+.subject{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
+.subject:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.subject h3{font-size:15.5px;font-weight:700;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.doc{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.doc:last-child{border-bottom:0}
+.doc b{font-weight:600}
+.doc .meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;align-items:center}
+.chunks{grid-column:1/-1;display:flex;flex-direction:column;gap:8px;max-height:340px;overflow:auto;padding:4px 2px}
+.chunk{font-size:13.5px;background:var(--sunk);border:1px solid var(--line);border-radius:9px;padding:9px 11px}
+.chunk .eyebrow{display:block;margin-bottom:3px}
+
+/* tutor */
+.tutor{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start}
+.thread{display:flex;flex-direction:column;gap:16px;min-height:360px}
+.msg{display:flex;flex-direction:column;gap:8px;min-width:0}
+.msg.user{align-items:flex-end}
+.msg.user .bubble{background:var(--accent);color:var(--accent-ink);border-radius:14px 14px 4px 14px;padding:10px 14px;max-width:min(560px,90%)}
+.msg.ai .bubble{background:var(--surface);border:1px solid var(--line);border-radius:4px 14px 14px 14px;padding:14px 16px;max-width:100%}
+.prose{max-width:72ch;overflow-wrap:anywhere}
+.prose p{margin:0 0 .7em}.prose p:last-child{margin-bottom:0}
+.prose h4{font-family:var(--f-display);font-size:15.5px;margin:.9em 0 .35em}
+.prose ul,.prose ol{margin:0 0 .7em;padding-left:1.3em}
+.prose li{margin:.18em 0}
+.prose code{font-family:var(--f-mono);font-size:.86em;background:var(--sunk);border:1px solid var(--line);border-radius:5px;padding:0 4px}
+.prose pre{background:var(--sunk);border:1px solid var(--line);border-radius:9px;padding:10px;overflow-x:auto;font-size:13px}
+.prose pre code{border:0;padding:0;background:none}
+.cite{all:unset;cursor:pointer;display:inline-block;font-family:var(--f-mono);font-size:10.5px;font-weight:600;line-height:1;padding:2px 5px;margin:0 1px;border-radius:5px;background:var(--mark);color:#3a2d00;vertical-align:1px}
+.cite:hover{filter:brightness(1.05);box-shadow:0 0 0 2px var(--mark-soft)}
+.trace{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.sources{display:flex;flex-direction:column;gap:6px}
+.src{font-size:13px;border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:var(--sunk);transition:background .3s,border-color .3s}
+.src.flash{background:var(--mark-soft);border-color:var(--mark)}
+.src-h{display:flex;justify-content:space-between;gap:8px;margin-bottom:3px;align-items:baseline}
+.src-h b{font-size:12.5px;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.src p{margin:0;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.src.open p{-webkit-line-clamp:unset;display:block}
+details.srcs summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);list-style:none;display:inline-flex;gap:6px;align-items:center}
+details.srcs summary::-webkit-details-marker{display:none}
+details.srcs[open] summary{margin-bottom:8px}
+.composer{position:sticky;bottom:calc(12px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;align-items:flex-end;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px;box-shadow:var(--shadow)}
+.composer textarea{min-height:44px;max-height:180px;border:0;background:transparent;box-shadow:none;padding:9px 8px;resize:none}
+.composer textarea:focus{box-shadow:none}
+.suggest{display:flex;flex-direction:column;gap:8px}
+.suggest button{all:unset;cursor:pointer;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-size:14px}
+.suggest button:hover{border-color:var(--accent)}
+.thinking{display:inline-flex;gap:4px;align-items:center;color:var(--muted);font-size:14px}
+.thinking i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:blink 1.2s infinite}
+.thinking i:nth-child(2){animation-delay:.2s}.thinking i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.side{display:flex;flex-direction:column;gap:14px;position:sticky;top:calc(16px + env(safe-area-inset-top,0px))}
+
+/* quiz */
+.qwrap{max-width:760px;display:flex;flex-direction:column;gap:16px}
+.qprog{display:flex;gap:4px}
+.qprog i{flex:1;height:5px;border-radius:99px;background:var(--line)}
+.qprog i.ok{background:var(--good)} .qprog i.no{background:var(--bad)} .qprog i.cur{background:var(--accent)}
+.qtext{font-family:var(--f-display);font-size:clamp(19px,2.3vw,23px);font-weight:700;line-height:1.3}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{all:unset;cursor:pointer;display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface)}
+.opt:hover{border-color:var(--accent)}
+.opt .k{font-family:var(--f-mono);font-size:12px;font-weight:600;width:24px;height:24px;border-radius:7px;display:grid;place-items:center;background:var(--sunk);border:1px solid var(--line)}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.right .k{background:var(--good);color:var(--surface);border-color:var(--good)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt.wrong .k{background:var(--bad);color:var(--surface);border-color:var(--bad)}
+.opt[disabled]{cursor:default}
+.explain{border-left:3px solid var(--mark);padding:10px 14px;background:var(--mark-soft);border-radius:0 10px 10px 0;font-size:14.5px}
+.explain blockquote{margin:8px 0 0;font-size:13px;color:var(--muted)}
+.score{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.ring{--p:0;width:96px;height:96px;border-radius:50%;background:conic-gradient(var(--good) calc(var(--p)*1%),var(--line) 0);display:grid;place-items:center;flex:none}
+.ring b{width:76px;height:76px;border-radius:50%;background:var(--surface);display:grid;place-items:center;font-family:var(--f-display);font-size:22px}
+
+/* flashcards */
+.deck-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.box{border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center;background:var(--sunk)}
+.box b{display:block;font-family:var(--f-display);font-size:20px;font-variant-numeric:tabular-nums}
+.box span{font-size:11px;color:var(--muted)}
+.flip{perspective:1400px;cursor:pointer;max-width:680px;width:100%}
+.flip-in{position:relative;min-height:250px;transition:transform .5s cubic-bezier(.3,.7,.3,1);transform-style:preserve-3d;display:grid}
+.flip.on .flip-in{transform:rotateY(180deg)}
+.face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:16px;border:1px solid var(--line);background:var(--surface);padding:24px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow);background-image:repeating-linear-gradient(transparent 0 31px,var(--line) 31px 32px);background-position:0 56px}
+.face.back{transform:rotateY(180deg);background-image:none;border-top:4px solid var(--mark)}
+.face .q{font-family:var(--f-display);font-size:clamp(18px,2.2vw,22px);font-weight:700;line-height:1.35;flex:1;display:flex;align-items:center}
+.rate{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;max-width:680px}
+.rate .btn{flex-direction:column;gap:1px;padding:10px}
+.rate small{font-weight:400;font-size:11.5px;color:var(--muted)}
+
+@media (max-width:1000px){
+  .tutor{grid-template-columns:minmax(0,1fr)}
+  .side{position:static}
+  .g-dash,.g-lib{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:860px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .rail{position:sticky;top:env(safe-area-inset-top,0px);height:auto;flex-direction:row;align-items:center;padding:10px 16px;gap:12px;z-index:20;border-right:0;border-bottom:1px solid var(--line);overflow-x:auto}
+  .brand small,.rail-foot{display:none}
+  .nav{flex-direction:row}
+  .nav button{padding:8px 10px}
+  .nav button span.lbl{display:none}
+  .nav button[aria-current="page"] span.lbl{display:inline}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hero{grid-template-columns:minmax(0,1fr)}
+  .g-2{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:520px){
+  .m-row{grid-template-columns:minmax(0,1fr) 70px 40px}
+  .m-act{grid-column:1/-1}
+  .pipe{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .deck-stats{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+  .box b{font-size:16px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="app">
+  <aside class="rail">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M9 8h7M9 12h5"/></svg></div>
+      <div><b>StudyMate</b><small>SRM · GENAI + RAG</small></div>
+    </div>
+    <nav class="nav" id="nav" aria-label="Sections">
+      <button data-view="dash"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span class="lbl">Dashboard</span></button>
+      <button data-view="lib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/><path d="M4 11.5v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg><span class="lbl">Knowledge base</span></button>
+      <button data-view="tutor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M9 10h6M9 13.5h4"/></svg><span class="lbl">AI Tutor</span></button>
+      <button data-view="quiz"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l2.5 2.5L16 9"/><rect x="3" y="3" width="18" height="18" rx="3"/></svg><span class="lbl">Quiz</span></button>
+      <button data-view="cards"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="15" height="13" rx="2"/><path d="M7 4h13a2 2 0 0 1 2 2v10"/></svg><span class="lbl">Flashcards</span><span class="count" id="dueCount" hidden>0</span></button>
+    </nav>
+    <div class="rail-foot">
+      <div class="ai-pill"><span class="dot" id="aiDot"></span><span id="aiText">Connecting to Claude…</span></div>
+      <div class="muted" style="font-size:12px;padding:0 4px">Your notes and progress stay in this browser.</div>
+    </div>
+  </aside>
+
+  <main id="main">
+    <!-- DASHBOARD -->
+    <section class="view" id="v-dash">
+      <div class="hero">
+        <div>
+          <div class="eyebrow" style="color:inherit;opacity:.7" id="heroDate"></div>
+          <h1 id="heroTitle">Your study desk</h1>
+          <p id="heroSub">Ask doubts from your own notes, test yourself, and let StudyMate track which topics need another pass.</p>
+        </div>
+        <div class="next" id="heroNext"></div>
+      </div>
+      <div class="stats">
+        <div class="stat"><b id="sDocs">0</b><span>notes in knowledge base</span></div>
+        <div class="stat"><b id="sChunks">0</b><span>indexed passages</span></div>
+        <div class="stat"><b id="sMastery">–</b><span>average mastery</span></div>
+        <div class="stat"><b id="sStreak">0</b><span>day study streak</span></div>
+      </div>
+      <div class="grid g-dash">
+        <div class="card">
+          <div class="card-head">
+            <div><h2>Topic mastery</h2><div class="muted" style="font-size:13px">Updated from every quiz answer and flashcard review</div></div>
+            <select id="mSubject" style="width:auto" aria-label="Filter by subject"></select>
+          </div>
+          <div class="mastery" id="masteryList"></div>
+        </div>
+        <div class="grid" style="align-content:start">
+          <div class="card">
+            <div class="card-head"><h2>Focus next</h2><span class="badge violet">Personalised</span></div>
+            <div id="focusList" class="sources"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h2>Adaptive learning cycle</h2></div>
+            <div class="cycle" id="cycle"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h2>Recent activity</h2></div>
+            <ul class="log" id="logList"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LIBRARY -->
+    <section class="view" id="v-lib" hidden>
+      <div class="view-head">
+        <div><h1>Knowledge base</h1><p>Add your syllabus units, class notes and PYQs. StudyMate splits them into passages, tags each with its topic and indexes them for retrieval.</p></div>
+      </div>
+      <div class="grid g-lib">
+        <div class="card raised">
+          <div class="card-head"><h2>Add material</h2></div>
+          <form id="addForm" class="grid" style="gap:12px">
+            <div class="row">
+              <label class="field">Subject<input type="text" id="fSubject" list="subjList" placeholder="e.g. Operating Systems" required></label>
+              <label class="field" style="flex:0 1 120px">Unit<input type="text" id="fUnit" placeholder="Unit 2"></label>
+            </div>
+            <datalist id="subjList"></datalist>
+            <label class="field">Title<input type="text" id="fTitle" placeholder="e.g. Process scheduling notes"></label>
+            <div class="drop" id="drop" tabindex="0" role="button" aria-label="Choose files">
+              <b>Drop PDF, TXT or MD files here</b>
+              <small>or click to choose · text PDFs only, scanned pages have no text to read</small>
+              <input type="file" id="fFile" accept=".pdf,.txt,.md,text/plain,application/pdf" multiple hidden>
+              <div id="fileList" class="mono muted" style="margin-top:6px"></div>
+            </div>
+            <label class="field">Or paste notes<textarea id="fText" placeholder="Paste notes here. Lines starting with # or numbered headings like 2.3 Deadlocks become topics."></textarea></label>
+            <div class="row" style="align-items:center">
+              <button class="btn primary" type="submit" id="addBtn" style="flex:0 0 auto">Add to knowledge base</button>
+              <span class="muted" id="addMsg" style="font-size:13px"></span>
+            </div>
+            <div>
+              <div class="eyebrow" style="margin-bottom:6px">Ingestion pipeline</div>
+              <div class="pipe" id="pipe">
+                <div class="pstep" data-s="parse"><span class="eyebrow">1 · Parse</span><b>–</b><small class="muted">characters</small></div>
+                <div class="pstep" data-s="struct"><span class="eyebrow">2 · Structure</span><b>–</b><small class="muted">topics found</small></div>
+                <div class="pstep" data-s="chunk"><span class="eyebrow">3 · Chunk</span><b>–</b><small class="muted">passages</small></div>
+                <div class="pstep" data-s="index"><span class="eyebrow">4 · Index</span><b>–</b><small class="muted">terms</small></div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Your subjects</h2><span class="badge" id="libCount"></span></div>
+          <div id="exNote"></div>
+          <div id="docList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TUTOR -->
+    <section class="view" id="v-tutor" hidden>
+      <div class="view-head">
+        <div><h1>AI Tutor</h1><p>Answers come from your notes, with every claim linked to the passage it came from.</p></div>
+      </div>
+      <div class="tutor">
+        <div class="grid" style="gap:14px">
+          <div class="thread" id="thread"></div>
+          <form class="composer" id="askForm">
+            <textarea id="askBox" rows="1" placeholder="Ask a doubt, e.g. Why is merge sort O(n log n)?"></textarea>
+            <button class="btn primary" type="submit" id="askBtn" aria-label="Ask"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+            <button class="btn" type="button" id="stopBtn" hidden>Stop</button>
+          </form>
+        </div>
+        <div class="side">
+          <div class="card">
+            <div class="eyebrow" style="margin-bottom:8px">Search in</div>
+            <select id="tSubject" aria-label="Subject"></select>
+            <div class="eyebrow" style="margin:14px 0 8px">Answer style</div>
+            <div class="chips" id="modeChips">
+              <button class="chip" data-mode="explain" aria-pressed="true">Explain</button>
+              <button class="chip" data-mode="exam" aria-pressed="false">Exam answer</button>
+              <button class="chip" data-mode="revise" aria-pressed="false">Quick revision</button>
+              <button class="chip" data-mode="simple" aria-pressed="false">From scratch</button>
+            </div>
+            <div style="margin-top:14px"><label class="switch"><input type="checkbox" id="boostWeak" checked> Boost my weak topics</label></div>
+            <div class="muted" style="font-size:12.5px;margin-top:6px">Passages from topics you scored low on rank higher in retrieval.</div>
+          </div>
+          <div class="card">
+            <div class="card-head" style="margin-bottom:8px"><h2 style="font-size:15px">Last retrieval</h2><button class="btn ghost sm" id="clearChat" type="button">New chat</button></div>
+            <div id="lastTrace" class="muted" style="font-size:13px">Ask something to see which passages were pulled.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUIZ -->
+    <section class="view" id="v-quiz" hidden>
+      <div class="view-head">
+        <div><h1>Quiz</h1><p>Questions are written from your own passages. Every answer feeds your topic mastery.</p></div>
+      </div>
+      <div class="qwrap" id="quizBox"></div>
+    </section>
+
+    <!-- FLASHCARDS -->
+    <section class="view" id="v-cards" hidden>
+      <div class="view-head">
+        <div><h1>Flashcards</h1><p>Spaced repetition in five boxes. Cards you know move to longer gaps; cards you miss come back today.</p></div>
+      </div>
+      <div class="grid g-2" style="align-items:start">
+        <div class="card">
+          <div class="card-head"><h2>Deck</h2><span class="badge" id="deckTotal"></span></div>
+          <div class="deck-stats" id="deckStats"></div>
+          <div class="row" style="margin-top:14px">
+            <label class="field">Subject<select id="cSubject"></select></label>
+            <label class="field">Topic<select id="cTopic"></select></label>
+          </div>
+          <div class="row" style="margin-top:10px;align-items:center">
+            <button class="btn primary" id="genCards" type="button" style="flex:0 0 auto">Make 8 cards</button>
+            <span class="muted" id="genMsg" style="font-size:13px"></span>
+          </div>
+        </div>
+        <div class="grid" id="reviewBox" style="gap:12px"></div>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+"use strict";
+/* ---------------- storage ---------------- */
+const S = {
+  get(k, d){ try{ const v = localStorage.getItem("sm2."+k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem("sm2."+k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+};
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid = () => Math.random().toString(36).slice(2,10);
+const DAY = 864e5;
+let toastT;
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,2600); }
+
+/* ---------------- example notes ---------------- */
+const EXAMPLES = [
+{subject:"Design and Analysis of Algorithms", unit:"Unit 1", title:"Algorithm analysis and divide & conquer", text:`# Asymptotic Notations
+Asymptotic notations describe how the running time of an algorithm grows as the input size n grows, ignoring constant factors and lower-order terms. Big-O, written O(g(n)), gives an upper bound: f(n) = O(g(n)) if there exist positive constants c and n0 such that f(n) <= c·g(n) for all n >= n0. Big-Omega, written Ω(g(n)), gives a lower bound: f(n) >= c·g(n) for all n >= n0. Big-Theta, written Θ(g(n)), gives a tight bound and holds when f(n) is both O(g(n)) and Ω(g(n)).
+For example, 3n² + 5n + 2 is Θ(n²) because for n >= 1 it lies between 3n² and 10n². Little-o and little-omega denote bounds that are not tight. Common growth orders from slowest to fastest are 1, log n, n, n log n, n², n³, 2ⁿ and n!.
+
+# Recurrence Relations and the Master Theorem
+Divide and conquer algorithms are analysed with recurrences of the form T(n) = aT(n/b) + f(n), where a >= 1 is the number of subproblems, n/b is the size of each subproblem and f(n) is the cost of dividing and combining. The Master Theorem compares f(n) with n^(log_b a).
+Case 1: if f(n) = O(n^(log_b a − ε)) for some ε > 0, then T(n) = Θ(n^(log_b a)). Case 2: if f(n) = Θ(n^(log_b a)), then T(n) = Θ(n^(log_b a) · log n). Case 3: if f(n) = Ω(n^(log_b a + ε)) and the regularity condition a·f(n/b) <= c·f(n) holds for some c < 1, then T(n) = Θ(f(n)).
+Example: merge sort gives T(n) = 2T(n/2) + n. Here a = 2, b = 2, so n^(log_2 2) = n, which matches f(n), so Case 2 applies and T(n) = Θ(n log n). Binary search gives T(n) = T(n/2) + 1, which is Case 2 with n^0 = 1, so T(n) = Θ(log n). Recurrences can also be solved by the substitution method and the recursion tree method.
+
+# Merge Sort
+Merge sort is a stable divide and conquer sorting algorithm. It divides the array into two halves, recursively sorts each half and then merges the two sorted halves in linear time using a temporary array. The merge step compares the front elements of both halves and copies the smaller one, so it takes Θ(n) time for n elements.
+Merge sort runs in Θ(n log n) time in the best, average and worst case because the array is always split evenly, giving log n levels with Θ(n) work per level. Its main drawback is the Θ(n) auxiliary space needed for merging, so it is not an in-place algorithm. It is preferred for linked lists and for external sorting of data that does not fit in memory.
+
+# Quick Sort
+Quick sort picks a pivot element and partitions the array so that elements smaller than the pivot come before it and larger elements come after it, then recursively sorts both parts. Partitioning (Lomuto or Hoare scheme) takes Θ(n) time and is done in place.
+The best and average case running time is Θ(n log n). The worst case is Θ(n²), which happens when the pivot is always the smallest or largest element, for example when a sorted array is partitioned with the last element as pivot. Randomised pivot selection or median-of-three makes the worst case very unlikely. Quick sort is not stable, but it is usually faster than merge sort in practice because of good cache behaviour and small constant factors, and it needs only O(log n) stack space on average.
+
+# Binary Search
+Binary search finds a key in a sorted array by comparing it with the middle element. If the key is smaller it continues in the left half, if larger it continues in the right half, and it stops when the key is found or the range becomes empty. Each comparison halves the search space, so it takes O(log n) time in the worst case and O(1) extra space when written iteratively.
+Binary search requires random access and a sorted input. A common bug is computing mid as (low + high) / 2, which can overflow for large indices; low + (high − low) / 2 avoids this. Variants find the first or last occurrence of a key, or the lower bound position where a key would be inserted.`},
+{subject:"Computer Networks", unit:"Unit 3", title:"Network layer: addressing and routing", text:`# IPv4 Addressing
+An IPv4 address is a 32-bit number written as four decimal octets, such as 192.168.10.25. Each address has a network part and a host part, separated by the subnet mask. In CIDR notation, /24 means the first 24 bits identify the network, leaving 8 bits for hosts.
+Private address ranges are 10.0.0.0/8, 172.16.0.0/12 and 192.168.0.0/16; these are not routed on the public internet. The first address of a subnet is the network address and the last is the broadcast address, so neither can be assigned to a host. 127.0.0.0/8 is reserved for loopback.
+
+# Subnetting
+Subnetting divides one network into smaller subnetworks by borrowing bits from the host part. If h host bits remain, the subnet has 2^h addresses and 2^h − 2 usable host addresses. For example, 192.168.1.0/26 leaves 6 host bits, giving 64 addresses and 62 usable hosts per subnet, and splits a /24 into four subnets: .0, .64, .128 and .192.
+The subnet mask for /26 is 255.255.255.192. To find the network address of a host, perform a bitwise AND of the IP address and the mask. Variable Length Subnet Masking (VLSM) allows subnets of different sizes inside the same network, which reduces wasted addresses, for example /30 subnets for point-to-point router links that need only two hosts.
+
+# ARP
+The Address Resolution Protocol maps a known IPv4 address to a MAC address on the local network. A host that wants to send a frame broadcasts an ARP request asking who has a given IP address; the owner replies with a unicast ARP reply containing its MAC address. The result is stored in the ARP cache for a limited time.
+If the destination is on another network, the host uses ARP to find the MAC address of its default gateway instead. Gratuitous ARP is sent by a host to announce its own address, and ARP spoofing is an attack where false replies poison other hosts' caches.
+
+# DHCP
+The Dynamic Host Configuration Protocol automatically gives a host an IP address, subnet mask, default gateway and DNS server. It uses UDP, with the server on port 67 and the client on port 68. The exchange has four messages, remembered as DORA: Discover (client broadcast), Offer (server proposes an address), Request (client asks for the offered address) and Acknowledge (server confirms the lease).
+Addresses are leased for a fixed time and the client renews the lease at half of the lease time. A DHCP relay agent forwards requests when the server is on a different subnet, because routers do not forward broadcasts by default.
+
+# NAT
+Network Address Translation lets many hosts with private addresses share one or a few public IPv4 addresses. The NAT router rewrites the source address of outgoing packets and keeps a translation table so that replies can be sent back to the correct inside host.
+Static NAT maps one private address to one public address, dynamic NAT maps from a pool, and PAT (NAT overload) maps many private addresses to one public address by also translating port numbers. NAT conserves IPv4 addresses and hides internal addressing, but it breaks the end-to-end principle and complicates peer-to-peer applications.
+
+# Routing Algorithms
+Routers choose paths using routing tables built by routing protocols. Distance vector routing, used by RIP, has each router share its whole table with its neighbours periodically and apply the Bellman-Ford equation; RIP uses hop count with a maximum of 15 hops. Distance vector protocols converge slowly and can suffer from the count-to-infinity problem, which split horizon and poison reverse reduce.
+Link state routing, used by OSPF, has each router flood link state advertisements so that every router builds a full map of the topology and runs Dijkstra's shortest path algorithm. Link state converges faster and scales better using areas, at the cost of more memory and CPU. Static routes are entered manually, and the default route 0.0.0.0/0 is used when no more specific route matches; routers always prefer the longest prefix match.`}
+];
+
+/* ---------------- text processing ---------------- */
+const STOP = new Set("a an the and or of to in on for is are was were be been being by with as at from that this these those it its into than then so such can could will would should may might must do does did done not no if when while which who whom what where why how there their they them he she we you your our i me my also each any all both more most other some same very just only over under about between after before up down out off again further once here both few own too s t d ll m o re ve y use used using one two three get gives given".split(" "));
+function stem(w){ if(w.length>4 && w.endsWith("ies")) return w.slice(0,-3)+"y"; if(w.length>4 && w.endsWith("ing")) return w.slice(0,-3); if(w.length>3 && w.endsWith("es") && /(ss|x|ch|sh)es$/.test(w)) return w.slice(0,-2); if(w.length>3 && w.endsWith("s") && !w.endsWith("ss")) return w.slice(0,-1); return w; }
+function tokens(t){ return String(t).toLowerCase().replace(/[^a-z0-9²ⁿ\s]/g," ").split(/\s+/).filter(w => w && !STOP.has(w) && (w.length>1 || /\d/.test(w))).map(stem); }
+function isHeading(l){
+  const t=l.trim(); if(!t || t.length>80) return null;
+  let m;
+  if((m=t.match(/^#{1,6}\s+(.+)/))) return m[1].trim();
+  if(/[.,;:]$/.test(t)) return null;
+  if((m=t.match(/^(\d+(?:\.\d+)*)\.?\s+([A-Z][^.]{2,70})$/))) return m[2].trim();
+  if(/^(unit|chapter|module|part)\s+[\divx]+/i.test(t)) return t;
+  if(/^[A-Z][A-Z0-9 &\-()/,]{3,60}$/.test(t) && t.split(" ").length<=8) return t.replace(/\w\S*/g,w=>w[0]+w.slice(1).toLowerCase());
+  return null;
+}
+function sentences(t){ return t.replace(/\s+/g," ").match(/[^.!?]+[.!?]+(\s|$)|[^.!?]+$/g)?.map(s=>s.trim()).filter(Boolean) || []; }
+function structure(text, fallback){
+  const lines = text.replace(/\r/g,"").split("\n");
+  const sections=[]; let cur={topic:fallback, lines:[]};
+  for(const l of lines){ const h=isHeading(l); if(h){ if(cur.lines.join("").trim()) sections.push(cur); cur={topic:h, lines:[]}; } else cur.lines.push(l); }
+  if(cur.lines.join("").trim()) sections.push(cur);
+  return sections;
+}
+function chunkSections(sections){
+  const out=[]; const MAX=850;
+  for(const sec of sections){
+    const paras = sec.lines.join("\n").split(/\n\s*\n/).map(p=>p.replace(/\s+/g," ").trim()).filter(Boolean);
+    let buf="";
+    const flush=()=>{ if(buf.trim().length>40) out.push({id:uid(), topic:sec.topic, text:buf.trim()}); };
+    for(const p of paras){
+      if((buf+" "+p).length<=MAX){ buf = buf ? buf+"\n"+p : p; continue; }
+      if(buf){ flush(); const last=sentences(buf).pop()||""; buf = last.length<200 ? last : ""; }
+      if(p.length>MAX){ let b2=buf; for(const s of sentences(p)){ if((b2+" "+s).length>MAX && b2){ buf=b2; flush(); const prev=sentences(b2).pop()||""; b2=(prev.length<200?prev+" ":"")+s; } else b2 = b2? b2+" "+s : s; } buf=b2; }
+      else buf = buf ? buf+"\n"+p : p;
+    }
+    flush();
+  }
+  return out;
+}
+
+/* ---------------- state ---------------- */
+let docs = S.get("docs", null);
+if(!docs){ docs = EXAMPLES.map(e => makeDoc(e, true)); S.set("docs", docs); }
+let mastery = S.get("mastery", {});   // key subject::topic -> {m, n, last}
+let cards = S.get("cards", []);
+let log = S.get("log", []);
+function makeDoc({subject,unit,title,text}, example=false){
+  const secs = structure(text, title || unit || subject);
+  return {id:uid(), subject:subject.trim(), unit:(unit||"").trim(), title:(title||unit||"Notes").trim(), added:Date.now(), example, chars:text.length, chunks:chunkSections(secs)};
+}
+function saveDocs(){ if(!S.set("docs", docs)) toast("Browser storage is full. Remove a large file to keep new notes."); }
+function addLog(type, text){ log.unshift({t:Date.now(), type, text}); log=log.slice(0,60); S.set("log", log); }
+const key = (s,t) => s+"::"+t;
+
+/* ---------------- BM25 index ---------------- */
+let IDX = null;
+function buildIndex(){
+  const items=[]; const df=new Map(); let total=0;
+  for(const d of docs) for(const c of d.chunks){
+    const toks = tokens(c.topic+" "+c.topic+" "+c.text); const tf=new Map();
+    toks.forEach(w=>tf.set(w,(tf.get(w)||0)+1));
+    tf.forEach((_,w)=>df.set(w,(df.get(w)||0)+1));
+    total+=toks.length; items.push({c, d, tf, len:toks.length});
+  }
+  IDX = {items, df, N:items.length, avg: total/Math.max(1,items.length)};
+}
+function idf(w){ const n=IDX.df.get(w)||0; return Math.log(1+(IDX.N-n+.5)/(n+.5)); }
+function retrieve(q, {subject="all", k=5, boost=false}={}){
+  const qt=[...new Set(tokens(q))]; const k1=1.4, b=.75; const res=[];
+  for(const it of IDX.items){
+    if(subject!=="all" && it.d.subject!==subject) continue;
+    let s=0;
+    for(const w of qt){ const f=it.tf.get(w); if(!f) continue; s += idf(w) * (f*(k1+1))/(f + k1*(1-b+b*it.len/IDX.avg)); }
+    if(s<=0) continue;
+    let boosted=false;
+    if(boost){ const m=mastery[key(it.d.subject,it.c.topic)]; if(m && m.m<.6){ s*=1.25; boosted=true; } }
+    res.push({...it, score:s, boosted});
+  }
+  res.sort((a,b)=>b.score-a.score);
+  return res.slice(0,k);
+}
+
+/* ---------------- topics & mastery ---------------- */
+function allTopics(subject="all"){
+  const seen=new Map();
+  for(const d of docs){ if(subject!=="all" && d.subject!==subject) continue; for(const c of d.chunks){ const k=key(d.subject,c.topic); if(!seen.has(k)) seen.set(k,{subject:d.subject, topic:c.topic, chunks:0}); seen.get(k).chunks++; } }
+  return [...seen.values()];
+}
+function subjects(){ return [...new Set(docs.map(d=>d.subject))].sort(); }
+function updateMastery(subject, topic, score){
+  const k=key(subject,topic); const p=mastery[k];
+  mastery[k] = p ? {m: .6*p.m + .4*score, n:p.n+1, last:Date.now()} : {m:score, n:1, last:Date.now()};
+  S.set("mastery", mastery);
+}
+function mColor(m){ return m>=.75?"":m>=.5?"mid":"low"; }
+function weakTopics(subject="all"){
+  return allTopics(subject).map(t=>({...t, ms:mastery[key(t.subject,t.topic)]})).filter(t=>t.ms && t.ms.m<.6).sort((a,b)=>a.ms.m-b.ms.m);
+}
+
+/* ---------------- Claude (sample) ---------------- */
+let sample = null; let aiState = "wait";
+function setAI(state){
+  aiState=state; const d=$("#aiDot"), t=$("#aiText");
+  d.className="dot "+(state==="on"?"on":state==="off"?"off":"");
+  t.textContent = state==="on" ? "Claude connected" : state==="off" ? "Offline mode · notes only" : "Connecting to Claude…";
+}
+(async()=>{
+  try{ sample = window.claude?.use ? await window.claude.use("sample") : null; }catch(e){ sample=null; }
+  setAI(sample ? "on" : "off");
+  if(view==="quiz" && !quiz) renderQuizSetup();
+})();
+function aiErr(e){
+  const c=e?.code;
+  if(c==="not_granted"||c==="sampling_disabled"||c==="not_declared"||c==="capability_disabled"){ sample=null; setAI("off"); return "Claude isn't allowed for this page, so StudyMate switched to offline mode."; }
+  if(c==="rate_limited") return "Claude is busy or your usage limit was reached. Try again in a little while.";
+  if(c==="session_expired") return "Your Claude session expired. Sign in again, then retry.";
+  if(c==="prompt_too_large") return "That was too much text for one request. Narrow the subject or topic.";
+  if(c==="invalid_json") return "Claude's reply couldn't be read as questions. Try generating again.";
+  if(c==="refused") return "Claude declined this request. Rephrase it and try again.";
+  return "Couldn't reach Claude just now. Try again.";
+}
+
+/* ---------------- markdown-lite ---------------- */
+function inline(s){
+  return s.replace(/`([^`]+)`/g,"<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>")
+    .replace(/(^|[^*])\*([^*\s][^*]*)\*/g,"$1<em>$2</em>")
+    .replace(/\[(\d+(?:\s*,\s*\d+)*)\]/g,(m,g)=>g.split(/\s*,\s*/).map(n=>`<button class="cite" data-n="${n}" type="button">${n}</button>`).join(""));
+}
+function md(src){
+  const lines=esc(src).split("\n"); let html=""; let list=null; let para=[]; let code=null;
+  const endPara=()=>{ if(para.length){ html+="<p>"+inline(para.join(" "))+"</p>"; para=[]; } };
+  const endList=()=>{ if(list){ html+=`</${list}>`; list=null; } };
+  for(const raw of lines){
+    if(code!==null){ if(/^```/.test(raw)){ html+="<pre><code>"+code+"</code></pre>"; code=null; } else code+=raw+"\n"; continue; }
+    if(/^```/.test(raw)){ endPara(); endList(); code=""; continue; }
+    const l=raw.trimEnd(); let m;
+    if(!l.trim()){ endPara(); endList(); continue; }
+    if((m=l.match(/^#{1,6}\s+(.+)/))){ endPara(); endList(); html+="<h4>"+inline(m[1])+"</h4>"; continue; }
+    if((m=l.match(/^\s*[-*•]\s+(.+)/))){ endPara(); if(list!=="ul"){ endList(); html+="<ul>"; list="ul"; } html+="<li>"+inline(m[1])+"</li>"; continue; }
+    if((m=l.match(/^\s*\d+[.)]\s+(.+)/))){ endPara(); if(list!=="ol"){ endList(); html+="<ol>"; list="ol"; } html+="<li>"+inline(m[1])+"</li>"; continue; }
+    endList(); para.push(l.trim());
+  }
+  if(code!==null) html+="<pre><code>"+code+"</code></pre>";
+  endPara(); endList(); return html;
+}
+
+/* ---------------- navigation ---------------- */
+let view = "dash";
+function go(v, opts={}){
+  view=v; $$(".view").forEach(s=>s.hidden = s.id!=="v-"+v);
+  $$("#nav button").forEach(b=>b.setAttribute("aria-current", b.dataset.view===v?"page":"false"));
+  if(v==="dash") renderDash();
+  if(v==="lib") renderLib();
+  if(v==="tutor"){ renderSubjectSelect($("#tSubject"), true); if(opts.subject) $("#tSubject").value=opts.subject; if(!chat.length) renderThread(); if(opts.ask){ $("#askBox").value=opts.ask; ask(); } }
+  if(v==="quiz"){ if(opts.topic){ quiz=null; renderQuizSetup(opts); } else if(!quiz) renderQuizSetup(); }
+  if(v==="cards") renderCards();
+  window.scrollTo({top:0});
+}
+$("#nav").addEventListener("click", e=>{ const b=e.target.closest("button"); if(b) go(b.dataset.view); });
+function renderSubjectSelect(sel, withAll, keep=true){
+  const prev=sel.value; const subs=subjects();
+  sel.innerHTML=(withAll?`<option value="all">All subjects</option>`:"")+subs.map(s=>`<option>${esc(s)}</option>`).join("");
+  if(keep && [...sel.options].some(o=>o.value===prev)) sel.value=prev;
+}
+function updateDue(){ const n=cards.filter(c=>c.due<=Date.now()).length; const el=$("#dueCount"); el.hidden=!n; el.textContent=n; }
+
+/* ---------------- dashboard ---------------- */
+function streak(){
+  const days=new Set(log.map(l=>new Date(l.t).toDateString())); let n=0; const d=new Date();
+  if(!days.has(d.toDateString())) d.setDate(d.getDate()-1);
+  while(days.has(d.toDateString())){ n++; d.setDate(d.getDate()-1); }
+  return n;
+}
+function ago(t){ const s=(Date.now()-t)/1000; if(s<60) return "now"; if(s<3600) return Math.floor(s/60)+"m"; if(s<86400) return Math.floor(s/3600)+"h"; return Math.floor(s/86400)+"d"; }
+function renderDash(){
+  const now=new Date();
+  $("#heroDate").textContent = now.toLocaleDateString(undefined,{weekday:"long", day:"numeric", month:"long"});
+  const hr=now.getHours(); $("#heroTitle").textContent = (hr<12?"Good morning":hr<17?"Good afternoon":"Good evening")+", let's study.";
+  const chunks=docs.reduce((a,d)=>a+d.chunks.length,0);
+  $("#sDocs").textContent=docs.length; $("#sChunks").textContent=chunks;
+  const ms=Object.values(mastery); $("#sMastery").textContent = ms.length? Math.round(ms.reduce((a,m)=>a+m.m,0)/ms.length*100)+"%" : "–";
+  $("#sStreak").textContent=streak();
+  // next action
+  const due=cards.filter(c=>c.due<=Date.now()).length; const weak=weakTopics(); const fresh=allTopics().filter(t=>!mastery[key(t.subject,t.topic)]);
+  let next;
+  if(due) next={label:`Review ${due} due flashcard${due>1?"s":""}`, sub:"Spaced repetition keeps them from slipping", act:()=>go("cards")};
+  else if(weak.length) next={label:`Quiz: ${weak[0].topic}`, sub:`Your weakest topic at ${Math.round(weak[0].ms.m*100)}%`, act:()=>go("quiz",{subject:weak[0].subject, topic:weak[0].topic})};
+  else if(fresh.length) next={label:`Start: ${fresh[0].topic}`, sub:`${fresh[0].subject} · not attempted yet`, act:()=>go("quiz",{subject:fresh[0].subject, topic:fresh[0].topic})};
+  else next={label:"Add more notes", sub:"Every topic is above 60%", act:()=>go("lib")};
+  $("#heroNext").innerHTML=`<span class="eyebrow" style="color:inherit;opacity:.7">Up next</span><button class="btn primary" id="nextBtn">${esc(next.label)}</button><small style="opacity:.75">${esc(next.sub)}</small>`;
+  $("#nextBtn").onclick=next.act;
+  // mastery list
+  renderSubjectSelect($("#mSubject"), true); renderMastery();
+  // focus
+  const focus=[...weak.slice(0,3), ...fresh.slice(0,Math.max(0,3-weak.length))];
+  $("#focusList").innerHTML = focus.length ? focus.map((t,i)=>`<div class="src"><div class="src-h"><b>${esc(t.topic)}</b>${t.ms?`<span class="badge bad">${Math.round(t.ms.m*100)}%</span>`:`<span class="badge">New</span>`}</div><div class="muted" style="font-size:12.5px;margin-bottom:8px">${esc(t.subject)}</div><div class="chips"><button class="btn sm" data-fq="${i}">Quiz me</button><button class="btn sm ghost" data-fa="${i}">Explain it</button></div></div>`).join("") : `<div class="empty">Take a quiz and your weak topics will show here.</div>`;
+  $$("[data-fq]").forEach(b=>b.onclick=()=>{const t=focus[b.dataset.fq]; go("quiz",{subject:t.subject, topic:t.topic});});
+  $$("[data-fa]").forEach(b=>b.onclick=()=>{const t=focus[b.dataset.fa]; go("tutor",{subject:t.subject, ask:`Explain ${t.topic} clearly with an example.`});});
+  // cycle
+  const stage = !log.length ? 0 : log[0].type==="ask" ? 0 : log[0].type==="quiz" ? 2 : log[0].type==="cards" ? 4 : 0;
+  $("#cycle").innerHTML=["Learn","Quiz","Analyse","Find weak areas","Recommend","Learn again"].map((s,i)=>`<span class="${i===stage?"now":""}">${s}</span>`).join("<em>→</em>");
+  // log
+  $("#logList").innerHTML = log.length ? log.slice(0,6).map(l=>`<li><time>${ago(l.t)}</time><span>${esc(l.text)}</span></li>`).join("") : `<li class="muted">Nothing yet. Ask the tutor a doubt or take a quiz.</li>`;
+}
+function renderMastery(){
+  const sub=$("#mSubject").value||"all";
+  const list=allTopics(sub).map(t=>({...t, ms:mastery[key(t.subject,t.topic)]})).sort((a,b)=>{ const am=a.ms?a.ms.m:2, bm=b.ms?b.ms.m:2; return am-bm || a.topic.localeCompare(b.topic); });
+  $("#masteryList").innerHTML = list.length ? list.map((t,i)=>{ const p=t.ms?Math.round(t.ms.m*100):null;
+    return `<div class="m-row"><div class="m-name"><b title="${esc(t.topic)}">${esc(t.topic)}</b><small>${esc(t.subject)} · ${t.ms?t.ms.n+" attempt"+(t.ms.n>1?"s":""):"not started"}</small></div>
+    <div class="bar" role="img" aria-label="${p??0}% mastery"><i class="${p==null?"":mColor(t.ms.m)}" style="width:${p??0}%"></i></div>
+    <div class="m-pct num">${p==null?"New":p+"%"}</div>
+    <div class="m-act"><button class="btn sm ghost" data-mq="${i}">Quiz</button></div></div>`; }).join("") : `<div class="empty">Add notes in the knowledge base to see topics here.</div>`;
+  $$("[data-mq]").forEach(b=>b.onclick=()=>{const t=list[b.dataset.mq]; go("quiz",{subject:t.subject, topic:t.topic});});
+}
+$("#mSubject").onchange=renderMastery;
+
+/* ---------------- library ---------------- */
+let pendingFiles=[];
+function renderLib(){
+  $("#subjList").innerHTML=subjects().map(s=>`<option value="${esc(s)}">`).join("");
+  const subs=subjects(); $("#libCount").textContent=`${docs.length} note${docs.length!==1?"s":""} · ${subs.length} subject${subs.length!==1?"s":""}`;
+  const ex=docs.filter(d=>d.example);
+  $("#exNote").innerHTML = ex.length ? `<div class="notice" style="margin-bottom:14px"><span>Two example units are loaded so you can try StudyMate right away. Remove them once your own notes are in.</span><button class="btn sm" id="rmEx" type="button" style="margin-left:auto">Remove examples</button></div>` : "";
+  if(ex.length) $("#rmEx").onclick=()=>{ docs=docs.filter(d=>!d.example); for(const k in mastery) if(!allTopics().some(t=>key(t.subject,t.topic)===k)) delete mastery[k]; S.set("mastery",mastery); cards=cards.filter(c=>docs.some(d=>d.subject===c.subject)); S.set("cards",cards); saveDocs(); buildIndex(); renderLib(); updateDue(); toast("Example notes removed"); };
+  $("#docList").innerHTML = subs.length ? subs.map(s=>{ const ds=docs.filter(d=>d.subject===s); const tps=allTopics(s).length;
+    return `<div class="subject"><h3>${esc(s)} <span class="badge">${tps} topics</span></h3>${ds.map(d=>`<div class="doc" data-id="${d.id}"><div style="min-width:0"><b>${esc(d.title)}</b><div class="meta">${d.unit?`<span class="badge acc">${esc(d.unit)}</span>`:""}<span class="badge">${d.chunks.length} passages</span><span class="badge">${(d.chars/1000).toFixed(1)}k chars</span>${d.example?`<span class="badge ex">Example</span>`:""}</div></div>
+      <div class="chips"><button class="btn sm ghost" data-view-chunks type="button">Passages</button><button class="btn sm ghost danger" data-del type="button">Remove</button></div></div>`).join("")}</div>`; }).join("") : `<div class="empty">No notes yet. Add your first unit on the left.</div>`;
+}
+$("#docList").addEventListener("click", e=>{
+  const row=e.target.closest(".doc"); if(!row) return; const d=docs.find(x=>x.id===row.dataset.id); if(!d) return;
+  if(e.target.closest("[data-view-chunks]")){ const ex=row.querySelector(".chunks"); if(ex){ ex.remove(); return; }
+    row.insertAdjacentHTML("beforeend", `<div class="chunks">${d.chunks.map((c,i)=>`<div class="chunk"><span class="eyebrow">#${i+1} · ${esc(c.topic)}</span>${esc(c.text)}</div>`).join("")}</div>`); }
+  if(e.target.closest("[data-del]")){ const b=e.target.closest("[data-del]");
+    if(b.dataset.armed){ docs=docs.filter(x=>x.id!==d.id); saveDocs(); buildIndex(); renderLib(); toast(`Removed “${d.title}”`); }
+    else { b.dataset.armed="1"; b.textContent="Confirm remove"; setTimeout(()=>{ if(b.isConnected){ delete b.dataset.armed; b.textContent="Remove"; } },3000); } }
+});
+const drop=$("#drop"), fFile=$("#fFile");
+drop.onclick=()=>fFile.click(); drop.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); fFile.click(); } };
+drop.ondragover=e=>{ e.preventDefault(); drop.classList.add("over"); }; drop.ondragleave=()=>drop.classList.remove("over");
+drop.ondrop=e=>{ e.preventDefault(); drop.classList.remove("over"); setFiles([...e.dataTransfer.files]); };
+fFile.onchange=()=>setFiles([...fFile.files]);
+function setFiles(fs){ pendingFiles=fs.filter(f=>/\.(pdf|txt|md)$/i.test(f.name)); $("#fileList").textContent=pendingFiles.map(f=>f.name).join(" · ") || (fs.length?"Only PDF, TXT and MD files can be read.":""); if(pendingFiles.length && !$("#fTitle").value) $("#fTitle").value=pendingFiles[0].name.replace(/\.\w+$/,"").replace(/[_-]+/g," "); }
+let pdfReady=null;
+function loadPdf(){ if(pdfReady) return pdfReady; const add=src=>new Promise((res,rej)=>{ const s=document.createElement("script"); s.src=src; s.onload=res; s.onerror=rej; document.head.appendChild(s); });
+  pdfReady = add("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js").then(()=>add("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js")).then(()=>{ window.pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"; return window.pdfjsLib; });
+  pdfReady.catch(()=>{ pdfReady=null; }); return pdfReady; }
+async function readFile(f){
+  if(/\.pdf$/i.test(f.name)){
+    const lib=await loadPdf(); const pdf=await lib.getDocument({data:new Uint8Array(await f.arrayBuffer())}).promise; let out="";
+    for(let p=1;p<=pdf.numPages;p++){ const tc=await (await pdf.getPage(p)).getTextContent(); out+=tc.items.map(it=>it.str+(it.hasEOL?"\n":" ")).join("")+"\n\n"; }
+    return out;
+  }
+  return await f.text();
+}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function pstep(s, val, state){ const el=$(`.pstep[data-s="${s}"]`); el.className="pstep "+(state||""); if(val!=null) el.querySelector("b").textContent=val; }
+$("#addForm").addEventListener("submit", async e=>{
+  e.preventDefault(); const btn=$("#addBtn"), msg=$("#addMsg");
+  const subject=$("#fSubject").value.trim(); if(!subject){ msg.textContent="Enter a subject name first."; return; }
+  let text=$("#fText").value.trim();
+  btn.disabled=true; ["parse","struct","chunk","index"].forEach(s=>pstep(s,"–",""));
+  try{
+    pstep("parse",null,"run"); msg.textContent=pendingFiles.length?"Reading files…":"Reading notes…";
+    for(const f of pendingFiles){ text += "\n\n" + await readFile(f); }
+    text=text.trim();
+    if(text.length<80){ msg.textContent = pendingFiles.length ? "No readable text found. Scanned PDFs need OCR first, or paste the text instead." : "Paste some notes or choose a file."; pstep("parse","0",""); return; }
+    if(text.length>400000){ text=text.slice(0,400000); toast("Very long file: kept the first 400k characters"); }
+    pstep("parse", text.length.toLocaleString(), "done"); await sleep(250);
+    const title=$("#fTitle").value.trim() || $("#fUnit").value.trim() || "Notes";
+    const doc=makeDoc({subject, unit:$("#fUnit").value, title, text});
+    pstep("struct", null, "run"); await sleep(200); pstep("struct", new Set(doc.chunks.map(c=>c.topic)).size, "done");
+    pstep("chunk", null, "run"); await sleep(200); pstep("chunk", doc.chunks.length, "done");
+    pstep("index", null, "run"); docs.push(doc); saveDocs(); buildIndex(); await sleep(200); pstep("index", IDX.df.size.toLocaleString(), "done");
+    addLog("add", `Added “${title}” to ${subject} (${doc.chunks.length} passages)`);
+    msg.textContent=`Added ${doc.chunks.length} passages across ${new Set(doc.chunks.map(c=>c.topic)).size} topics.`;
+    $("#fText").value=""; $("#fTitle").value=""; pendingFiles=[]; fFile.value=""; $("#fileList").textContent="";
+    renderLib();
+  }catch(err){ msg.textContent="Couldn't read that file. If it's a PDF, try saving it again or paste the text."; pstep("parse","!",""); }
+  finally{ btn.disabled=false; }
+});
+
+/* ---------------- tutor ---------------- */
+let chat=[]; let mode="explain"; let askCtl=null;
+const MODES={
+  explain:"Explain the concept clearly for a B.Tech student, with a short worked example where it helps. Use short paragraphs and bullets.",
+  exam:"Write a well-structured university exam answer (about 13 marks): a one-line definition, then headed sections, key points as bullets, a small example or diagram description, and a 2-line conclusion.",
+  revise:"Give a quick revision sheet: at most 6 crisp bullet points with the key facts, formulas and complexities to remember.",
+  simple:"Explain from scratch as if the student is new to the topic: plain words, one everyday analogy, then the precise idea."
+};
+$("#modeChips").addEventListener("click", e=>{ const b=e.target.closest(".chip"); if(!b) return; mode=b.dataset.mode; $$("#modeChips .chip").forEach(c=>c.setAttribute("aria-pressed", c===b)); });
+function suggestions(){
+  const sub=$("#tSubject").value||"all"; const tps=allTopics(sub); const weak=weakTopics(sub);
+  const pick=[...weak.map(t=>t.topic), ...tps.map(t=>t.topic)].filter((v,i,a)=>a.indexOf(v)===i).slice(0,4);
+  const forms=["Explain %s with an example.","What are the key points of %s for the exam?","Compare the cases or types in %s.","What mistakes do students make in %s?"];
+  return pick.map((t,i)=>forms[i%forms.length].replace("%s",t));
+}
+function renderThread(){
+  const th=$("#thread");
+  if(!chat.length){
+    const sg=suggestions();
+    th.innerHTML=`<div class="card"><div class="eyebrow" style="margin-bottom:6px">Try asking</div><h2 style="margin-bottom:12px">What's confusing you today?</h2>${sg.length?`<div class="suggest">${sg.map(s=>`<button type="button">${esc(s)}</button>`).join("")}</div>`:`<div class="empty">Add notes to the knowledge base first.</div>`}${!sample&&aiState==="off"?`<div class="notice" style="margin-top:12px">Claude isn't available here, so answers will be the best-matching passages from your notes.</div>`:""}</div>`;
+    $$(".suggest button", th).forEach(b=>b.onclick=()=>{ $("#askBox").value=b.textContent; ask(); });
+    return;
+  }
+  th.innerHTML=chat.map((m,i)=>m.role==="user"?`<div class="msg user"><div class="bubble">${esc(m.content)}</div></div>`:aiMsgHTML(m,i)).join("");
+}
+function aiMsgHTML(m,i){
+  const src=m.sources||[];
+  const trace=`<div class="trace">${m.offline?`<span class="badge warn">Offline · notes only</span>`:""}<span class="badge">${src.length} passages · ${m.ms}ms</span>${m.boosted?`<span class="badge violet">${m.boosted} weak-topic boost</span>`:""}${m.ground!=null?`<span class="badge ${m.ground>=.7?"good":m.ground>=.4?"warn":"bad"}">Grounded ${Math.round(m.ground*100)}%</span>`:""}${m.note?`<span class="badge bad">${esc(m.note)}</span>`:""}</div>`;
+  const body = m.pending && !m.content ? `<span class="thinking"><i></i><i></i><i></i>&nbsp;Reading ${src.length} passages…</span>` : `<div class="prose">${md(m.content)}</div>`;
+  return `<div class="msg ai" data-i="${i}"><div class="bubble">${body}</div>${m.pending?"":trace}${src.length?`<details class="srcs"${m.offline?" open":""}><summary>▸ Sources from your notes</summary><div class="sources">${src.map((s,j)=>`<div class="src" data-src="${j+1}"><div class="src-h"><b>[${j+1}] ${esc(s.topic)}</b><span class="mono muted">${s.score.toFixed(2)}</span></div><div class="muted" style="font-size:11.5px;margin-bottom:3px">${esc(s.subject)} · ${esc(s.title)}</div><p>${esc(s.text)}</p></div>`).join("")}</div></details>`:""}</div>`;
+}
+function groundScore(ans, srcs){
+  const ss=sentences(ans.replace(/^#+.*$/gm,"")).filter(s=>s.length>25); if(!ss.length) return null;
+  const vocab=new Set(srcs.flatMap(s=>tokens(s.text)));
+  let ok=0; for(const s of ss){ if(/\[\d/.test(s)){ ok++; continue; } const t=tokens(s); if(t.length && t.filter(w=>vocab.has(w)).length/t.length>=.6) ok+=.7; }
+  return Math.min(1, ok/ss.length);
+}
+$("#thread").addEventListener("click", e=>{
+  const c=e.target.closest(".cite"); if(c){ const msg=c.closest(".msg"); const det=msg.querySelector("details.srcs"); if(det){ det.open=true; const s=det.querySelector(`[data-src="${c.dataset.n}"]`); if(s){ s.classList.add("flash","open"); s.scrollIntoView({block:"nearest",behavior:"smooth"}); setTimeout(()=>s.classList.remove("flash"),1600); } } return; }
+  const s=e.target.closest(".src"); if(s) s.classList.toggle("open");
+});
+async function ask(){
+  const box=$("#askBox"); const q=box.value.trim(); if(!q || askCtl) return;
+  box.value=""; autoGrow();
+  const sub=$("#tSubject").value||"all"; const boost=$("#boostWeak").checked;
+  const t0=performance.now(); const hits=retrieve(q,{subject:sub,k:5,boost}); const ms=Math.round(performance.now()-t0);
+  const sources=hits.map(h=>({topic:h.c.topic, subject:h.d.subject, title:h.d.title, text:h.c.text, score:h.score, boosted:h.boosted}));
+  chat.push({role:"user", content:q});
+  const ai={role:"assistant", content:"", sources, ms, boosted:sources.filter(s=>s.boosted).length, pending:true};
+  chat.push(ai); renderThread(); scrollEnd();
+  $("#lastTrace").innerHTML = sources.length ? `<div class="sources">${sources.map((s,j)=>`<div style="display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center"><span class="cite">${j+1}</span><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(s.topic)}</span><span class="mono">${s.score.toFixed(1)}${s.boosted?" ↑":""}</span></div>`).join("")}</div><div style="margin-top:8px">BM25 over ${IDX.N} passages in ${ms}ms</div>` : "No matching passages.";
+  addLog("ask", `Asked: ${q.length>60?q.slice(0,60)+"…":q}`);
+  if(!sources.length){ ai.pending=false; ai.content="I couldn't find anything about this in your notes. Check the subject filter, or add the unit that covers it in the knowledge base."; renderThread(); return; }
+  if(!sample){ ai.pending=false; ai.offline=true; ai.content=extractive(q,sources); ai.ground=1; renderThread(); scrollEnd(); return; }
+  const ctx=sources.map((s,j)=>`[${j+1}] (${s.subject} › ${s.topic})\n${s.text}`).join("\n\n");
+  const rules=`You are SRM StudyMate, a patient tutor for an SRM Institute of Science and Technology B.Tech student. Ground every answer in the numbered note excerpts supplied with each question. Cite like [1] or [2,3] right after each claim that comes from them. If the excerpts don't cover part of the question, add a short final section headed "Beyond your notes" with general knowledge, clearly marked. Use Markdown: short paragraphs, bullets, **bold** key terms, \`code\` for formulas. No preamble.`;
+  const hist=chat.slice(0,-2).slice(-6).map(m=>({role:m.role, content:m.content||"(no answer)"}));
+  const turns=[{role:"user",content:rules}, ...hist, {role:"user", content:`Style: ${MODES[mode]}\n\nNote excerpts:\n${ctx}\n\nQuestion: ${q}`}];
+  askCtl=new AbortController(); $("#askBtn").hidden=true; $("#stopBtn").hidden=false;
+  try{
+    const r=await sample(turns,{signal:askCtl.signal, cache:false, onText:({text})=>{ ai.content=text; ai.pending=true; const el=$(`.msg.ai[data-i="${chat.length-1}"] .bubble`); if(el) el.innerHTML=`<div class="prose">${md(text)}</div>`; }});
+    ai.content=r.text; if(r.truncated) ai.note="Cut short";
+  }catch(e){ ai.content=e?.text||""; if(e?.code!=="cancelled"){ ai.note="Interrupted"; if(!ai.content){ ai.content=aiErr(e)+"\n\nHere are the best-matching passages instead:\n\n"+extractive(q,sources); ai.offline=true; } } else if(!ai.content) ai.content="Stopped."; }
+  finally{ ai.pending=false; ai.ground=groundScore(ai.content,sources); askCtl=null; $("#askBtn").hidden=false; $("#stopBtn").hidden=true; renderThread(); scrollEnd(); }
+}
+function extractive(q,sources){
+  const qt=new Set(tokens(q)); const scored=[];
+  sources.forEach((s,j)=>sentences(s.text).forEach((t,k)=>{ const tk=tokens(t); const hit=tk.filter(w=>qt.has(w)).length; if(hit) scored.push({t,j,sc:hit/Math.sqrt(tk.length+1)-k*.01}); }));
+  scored.sort((a,b)=>b.sc-a.sc);
+  const top=scored.slice(0,5).sort((a,b)=>a.j-b.j);
+  return top.length ? top.map(x=>`- ${x.t} [${x.j+1}]`).join("\n") : sources.slice(0,2).map((s,j)=>`- ${sentences(s.text).slice(0,2).join(" ")} [${j+1}]`).join("\n");
+}
+function scrollEnd(){ const last=$("#thread").lastElementChild; if(last) last.scrollIntoView({block:"end",behavior:"smooth"}); }
+$("#askForm").addEventListener("submit", e=>{ e.preventDefault(); ask(); });
+$("#askBox").addEventListener("keydown", e=>{ if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); ask(); } });
+function autoGrow(){ const b=$("#askBox"); b.style.height="auto"; b.style.height=Math.min(180,b.scrollHeight)+"px"; }
+$("#askBox").addEventListener("input", autoGrow);
+$("#stopBtn").onclick=()=>askCtl?.abort();
+$("#clearChat").onclick=()=>{ askCtl?.abort(); chat=[]; renderThread(); $("#lastTrace").textContent="Ask something to see which passages were pulled."; };
+$("#tSubject").onchange=()=>{ if(!chat.length) renderThread(); };
+
+/* ---------------- quiz ---------------- */
+let quiz=null; let quizCtl=null;
+function pickChunks(subject, topic, weakFocus, max=7){
+  let pool=[]; for(const d of docs){ if(subject!=="all" && d.subject!==subject) continue; for(const c of d.chunks) if(topic==="all"||c.topic===topic) pool.push({c,d}); }
+  if(weakFocus && topic==="all"){ const w=new Set(weakTopics(subject).map(t=>key(t.subject,t.topic))); const fresh=new Set(allTopics(subject).filter(t=>!mastery[key(t.subject,t.topic)]).map(t=>key(t.subject,t.topic)));
+    pool.forEach(p=>{ const k=key(p.d.subject,p.c.topic); p.w = w.has(k)?3: fresh.has(k)?2:1; }); }
+  else pool.forEach(p=>p.w=1);
+  const out=[]; let chars=0;
+  while(pool.length && out.length<max && chars<6500){ const tot=pool.reduce((a,p)=>a+p.w,0); let r=Math.random()*tot; let i=0; while((r-=pool[i].w)>0) i++; const p=pool.splice(i,1)[0]; out.push(p); chars+=p.c.text.length; }
+  return out;
+}
+function renderQuizSetup(opts={}){
+  const subs=subjects(); const sub=opts.subject || (quizSetupPrev.subject && subs.includes(quizSetupPrev.subject) ? quizSetupPrev.subject : "all");
+  $("#quizBox").innerHTML=`<div class="card raised">
+    <div class="card-head"><h2>Set up a quiz</h2>${sample?`<span class="badge good">Written by Claude</span>`:`<span class="badge warn">Offline · fill-in-the-blank</span>`}</div>
+    <div class="grid" style="gap:12px">
+      <div class="row"><label class="field">Subject<select id="qSubject"><option value="all">All subjects</option>${subs.map(s=>`<option ${s===sub?"selected":""}>${esc(s)}</option>`).join("")}</select></label>
+      <label class="field">Topic<select id="qTopic"></select></label></div>
+      <div class="row" style="align-items:center"><div style="flex:0 1 auto"><div class="eyebrow" style="margin-bottom:6px">Questions</div><div class="chips" id="qN">${[5,8,10].map(n=>`<button type="button" class="chip" data-n="${n}" aria-pressed="${n===(quizSetupPrev.n||5)}">${n}</button>`).join("")}</div></div>
+      <label class="switch" style="flex:1 1 200px;margin-top:18px"><input type="checkbox" id="qWeak" ${quizSetupPrev.weak!==false?"checked":""}> Focus on weak and new topics</label></div>
+      <div class="row" style="align-items:center"><button class="btn primary" id="qStart" type="button" style="flex:0 0 auto">Start quiz</button><span class="muted" id="qMsg" style="font-size:13px"></span></div>
+    </div></div>`;
+  const fillTopics=()=>{ const s=$("#qSubject").value; const tps=allTopics(s); $("#qTopic").innerHTML=`<option value="all">All topics</option>`+tps.map(t=>`<option ${t.topic===opts.topic?"selected":""}>${esc(t.topic)}</option>`).join(""); };
+  fillTopics(); $("#qSubject").onchange=()=>{ opts.topic=null; fillTopics(); };
+  $("#qN").onclick=e=>{ const b=e.target.closest(".chip"); if(!b) return; $$("#qN .chip").forEach(c=>c.setAttribute("aria-pressed",c===b)); };
+  $("#qStart").onclick=startQuiz;
+}
+let quizSetupPrev={};
+async function startQuiz(){
+  const subject=$("#qSubject").value, topic=$("#qTopic").value, n=+($("#qN [aria-pressed=true]")?.dataset.n||5), weak=$("#qWeak").checked;
+  quizSetupPrev={subject,n,weak};
+  const picked=pickChunks(subject,topic,weak); if(!picked.length){ $("#qMsg").textContent="No passages found for that choice."; return; }
+  const btn=$("#qStart"); btn.disabled=true;
+  let qs=null;
+  if(sample){
+    $("#qMsg").innerHTML=`<span class="thinking"><i></i><i></i><i></i>&nbsp;Writing ${n} questions from ${picked.length} passages…</span>`;
+    const ex=picked.map((p,i)=>`[${i+1}] (Subject: ${p.d.subject} | Topic: ${p.c.topic})\n${p.c.text}`).join("\n\n");
+    const prompt=`Write ${n} multiple-choice questions for an SRM B.Tech exam using ONLY the numbered note excerpts below. Mix recall, application (small numeric or trace questions where the notes allow) and conceptual questions. Make distractors plausible. Spread questions across the excerpts.
+Reply with only a JSON array. Each item: {"q": string, "options": [exactly 4 short strings], "answer": index 0-3 of the correct option, "explain": one or two sentences on why, "source": excerpt number, "topic": the exact Topic label from that excerpt}.
+Example: [{"q":"What is the worst-case time of quick sort?","options":["O(n)","O(n log n)","O(n²)","O(log n)"],"answer":2,"explain":"A pivot that is always the smallest or largest element gives n levels of Θ(n) work.","source":1,"topic":"Quick Sort"}]
+
+${ex}`;
+    quizCtl=new AbortController();
+    try{ const arr=await sample.json(prompt,{signal:quizCtl.signal, cache:false});
+      qs=(Array.isArray(arr)?arr:[]).filter(x=>x&&x.q&&Array.isArray(x.options)&&x.options.length>=2&&Number.isInteger(+x.answer)&&+x.answer<x.options.length).slice(0,n).map(x=>{ const p=picked[(+x.source||1)-1]||picked[0]; const tp=allTopics(p.d.subject).some(t=>t.topic===x.topic)?x.topic:p.c.topic; return {q:String(x.q), options:x.options.map(String), answer:+x.answer, explain:String(x.explain||""), subject:p.d.subject, topic:tp, src:p.c.text}; });
+      if(!qs.length) throw {code:"invalid_json"};
+    }catch(e){ if(e?.code==="cancelled"){ btn.disabled=false; $("#qMsg").textContent=""; return; } $("#qMsg").textContent=aiErr(e)+" Using offline questions."; qs=null; await sleep(900); }
+    quizCtl=null;
+  }
+  if(!qs) qs=offlineQuiz(picked,n);
+  if(!qs.length){ $("#qMsg").textContent="These passages are too short to make questions from."; btn.disabled=false; return; }
+  quiz={qs, i:0, picks:[], subject, topic};
+  renderQ();
+}
+function offlineQuiz(picked,n){
+  const vocabTerms=[]; const out=[];
+  for(const p of picked) for(const s of sentences(p.c.text)){ const words=s.match(/[A-Za-z][A-Za-z\-]{4,}/g)||[]; words.forEach(w=>{ if(!STOP.has(w.toLowerCase())) vocabTerms.push(w); }); }
+  const uniq=[...new Set(vocabTerms.map(w=>w))];
+  const cand=[];
+  for(const p of picked) for(const s of sentences(p.c.text)){ if(s.length<50||s.length>260) continue;
+    const words=(s.match(/[A-Za-z][A-Za-z\-]{4,}/g)||[]).filter(w=>!STOP.has(w.toLowerCase()));
+    if(!words.length) continue; let best=null, bs=-1; for(const w of words){ const sc=idf(stem(w.toLowerCase()))+(/[A-Z]/.test(w[0])&&s.indexOf(w)>0?1:0); if(sc>bs){bs=sc;best=w;} }
+    cand.push({p,s,w:best,sc:bs}); }
+  cand.sort(()=>Math.random()-.5);
+  const usedTopics=new Map();
+  for(const c of cand){ if(out.length>=n) break; const k=c.p.c.topic; if((usedTopics.get(k)||0)>=2) continue;
+    const dis=uniq.filter(w=>w.toLowerCase()!==c.w.toLowerCase() && Math.abs(w.length-c.w.length)<6).sort(()=>Math.random()-.5).slice(0,3);
+    if(dis.length<3) continue; const opts=[c.w,...dis].sort(()=>Math.random()-.5);
+    out.push({q:"Fill in the blank: "+c.s.replace(new RegExp("\\b"+c.w.replace(/[-]/g,"\\-")+"\\b"),"_____"), options:opts, answer:opts.indexOf(c.w), explain:"From your notes on "+k+".", subject:c.p.d.subject, topic:k, src:c.s});
+    usedTopics.set(k,(usedTopics.get(k)||0)+1); }
+  return out;
+}
+function renderQ(){
+  const {qs,i,picks}=quiz; const q=qs[i]; const answered=picks[i]!=null;
+  $("#quizBox").innerHTML=`<div class="qprog">${qs.map((_,j)=>`<i class="${picks[j]!=null?(picks[j]===qs[j].answer?"ok":"no"):j===i?"cur":""}"></i>`).join("")}</div>
+  <div class="card raised" style="display:flex;flex-direction:column;gap:16px">
+    <div class="row" style="justify-content:space-between;align-items:center"><span class="eyebrow" style="flex:0 1 auto">Question ${i+1} of ${qs.length}</span><span class="badge acc" style="flex:0 1 auto">${esc(q.topic)}</span></div>
+    <div class="qtext">${esc(q.q)}</div>
+    <div class="opts">${q.options.map((o,j)=>`<button class="opt ${answered?(j===q.answer?"right":j===picks[i]?"wrong":""):""}" data-j="${j}" ${answered?"disabled":""}><span class="k">${"ABCD"[j]||j+1}</span><span>${esc(o)}</span></button>`).join("")}</div>
+    ${answered?`<div class="explain"><b>${picks[i]===q.answer?"Correct.":"Not quite."}</b> ${esc(q.explain)}<blockquote>From your notes: “${esc(q.src.length>260?q.src.slice(0,260)+"…":q.src)}”</blockquote></div>
+    <div class="row" style="justify-content:flex-end"><button class="btn primary" id="qNext" style="flex:0 0 auto">${i+1<qs.length?"Next question":"See results"}</button></div>`:""}
+  </div>`;
+  $$(".opt").forEach(b=>b.onclick=()=>{ if(quiz.picks[i]!=null) return; quiz.picks[i]=+b.dataset.j; renderQ(); });
+  const nx=$("#qNext"); if(nx){ nx.onclick=()=>{ if(i+1<qs.length){ quiz.i++; renderQ(); } else finishQuiz(); }; nx.focus(); }
+}
+function finishQuiz(){
+  const {qs,picks}=quiz; const by=new Map(); let right=0;
+  qs.forEach((q,i)=>{ const ok=picks[i]===q.answer; if(ok) right++; const k=key(q.subject,q.topic); if(!by.has(k)) by.set(k,{subject:q.subject, topic:q.topic, r:0, n:0}); const b=by.get(k); b.n++; if(ok) b.r++; });
+  by.forEach(b=>updateMastery(b.subject,b.topic,b.r/b.n));
+  const pct=Math.round(right/qs.length*100);
+  addLog("quiz", `Quiz: ${right}/${qs.length} (${pct}%)${quiz.topic!=="all"?" on "+quiz.topic:""}`);
+  const missed=qs.filter((q,i)=>picks[i]!==q.answer);
+  $("#quizBox").innerHTML=`<div class="card raised"><div class="score"><div class="ring" style="--p:${pct}"><b class="num">${pct}%</b></div><div><h2 style="font-size:22px">${pct>=80?"Strong work.":pct>=50?"Getting there.":"This needs another pass."}</h2><p class="muted" style="margin:4px 0 0">${right} of ${qs.length} correct. Your topic mastery has been updated.</p></div></div></div>
+  <div class="card"><div class="card-head"><h2>By topic</h2></div><div class="mastery">${[...by.values()].map(b=>{ const m=mastery[key(b.subject,b.topic)]; const p=Math.round(m.m*100); return `<div class="m-row"><div class="m-name"><b>${esc(b.topic)}</b><small>${b.r}/${b.n} this quiz</small></div><div class="bar"><i class="${mColor(m.m)}" style="width:${p}%"></i></div><div class="m-pct num">${p}%</div><div></div></div>`; }).join("")}</div></div>
+  <div class="row" style="justify-content:flex-start">${missed.length?`<button class="btn primary" id="toCards" style="flex:0 0 auto">Turn ${missed.length} missed into flashcards</button>`:""}<button class="btn" id="again" style="flex:0 0 auto">New quiz</button>${missed.length?`<button class="btn ghost" id="askMiss" style="flex:0 0 auto">Explain what I missed</button>`:""}</div>`;
+  $("#again").onclick=()=>{ quiz=null; renderQuizSetup(); };
+  const tc=$("#toCards"); if(tc) tc.onclick=()=>{ missed.forEach(q=>cards.push({id:uid(), front:q.q, back:`${q.options[q.answer]}\n\n${q.explain}`, subject:q.subject, topic:q.topic, box:1, due:Date.now()})); S.set("cards",cards); updateDue(); tc.disabled=true; tc.textContent="Added to flashcards"; toast(`${missed.length} cards added`); };
+  const am=$("#askMiss"); if(am) am.onclick=()=>{ const tps=[...new Set(missed.map(q=>q.topic))]; go("tutor",{subject:missed[0].subject, ask:`I got questions wrong on ${tps.join(", ")}. Explain the ideas I'm likely confusing, with examples.`}); };
+  renderDash(); updateDue();
+}
+
+/* ---------------- flashcards ---------------- */
+const GAPS=[0,0,1,3,7,14]; let flipped=false; let cardsCtl=null;
+function renderCards(){
+  renderSubjectSelect($("#cSubject"), false);
+  const fill=()=>{ const tps=allTopics($("#cSubject").value); const prev=$("#cTopic").value; $("#cTopic").innerHTML=`<option value="all">Mixed topics</option>`+tps.map(t=>`<option>${esc(t.topic)}</option>`).join(""); if([...$("#cTopic").options].some(o=>o.value===prev)) $("#cTopic").value=prev; };
+  fill(); $("#cSubject").onchange=fill;
+  const counts=[1,2,3,4,5].map(b=>cards.filter(c=>c.box===b).length);
+  $("#deckStats").innerHTML=counts.map((n,i)=>`<div class="box"><b>${n}</b><span>Box ${i+1}${i?` · ${GAPS[i+1]}d`:" · today"}</span></div>`).join("");
+  $("#deckTotal").textContent=`${cards.length} cards`;
+  renderReview(); updateDue();
+}
+function renderReview(){
+  const due=cards.filter(c=>c.due<=Date.now()).sort((a,b)=>a.box-b.box||a.due-b.due);
+  const box=$("#reviewBox");
+  if(!due.length){
+    const nextDue=cards.length?Math.min(...cards.map(c=>c.due)):null;
+    box.innerHTML=`<div class="card"><div class="empty">${cards.length?`All caught up. Next card is due ${new Date(nextDue).toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"})}.`:"No cards yet. Make a set from your notes, or turn missed quiz questions into cards."}</div></div>`; return;
+  }
+  const c=due[0]; flipped=false;
+  box.innerHTML=`<div class="row" style="justify-content:space-between;align-items:center"><span class="eyebrow" style="flex:0 1 auto">${due.length} due · Box ${c.box}</span><span class="badge acc" style="flex:0 1 auto">${esc(c.topic)}</span></div>
+  <div class="flip" id="flip" tabindex="0" role="button" aria-label="Flip card"><div class="flip-in">
+    <div class="face"><span class="eyebrow">Question</span><div class="q">${esc(c.front)}</div><span class="muted" style="font-size:12.5px">Tap or press Space to reveal</span></div>
+    <div class="face back"><span class="eyebrow">Answer</span><div class="prose">${md(c.back)}</div></div>
+  </div></div>
+  <div class="rate" id="rate" hidden>
+    <button class="btn" data-r="again" style="color:var(--bad)">Again<small>today</small></button>
+    <button class="btn" data-r="good" style="color:var(--warn)">Good<small>${GAPS[Math.min(5,c.box+1)]}d</small></button>
+    <button class="btn" data-r="easy" style="color:var(--good)">Easy<small>${GAPS[Math.min(5,c.box+2)]}d</small></button>
+  </div>`;
+  const flip=()=>{ flipped=!flipped; $("#flip").classList.toggle("on",flipped); $("#rate").hidden=!flipped; };
+  $("#flip").onclick=flip; $("#flip").onkeydown=e=>{ if(e.key===" "||e.key==="Enter"){ e.preventDefault(); flip(); } };
+  $$("#rate [data-r]").forEach(b=>b.onclick=()=>rate(c,b.dataset.r));
+}
+function rate(c,r){
+  if(r==="again"){ c.box=1; c.due=Date.now()+60e3; } else { c.box=Math.min(5,c.box+(r==="easy"?2:1)); c.due=Date.now()+GAPS[c.box]*DAY; }
+  updateMastery(c.subject,c.topic, r==="again"?0:r==="good"?.75:1);
+  S.set("cards",cards); addLog("cards", `Reviewed a ${c.topic} card: ${r}`); renderCards();
+}
+$("#genCards").onclick=async()=>{
+  const subject=$("#cSubject").value, topic=$("#cTopic").value; if(!subject){ $("#genMsg").textContent="Add notes first."; return; }
+  const picked=pickChunks(subject,topic,false,5); if(!picked.length){ $("#genMsg").textContent="No passages for that topic."; return; }
+  const btn=$("#genCards"); btn.disabled=true; let made=[];
+  if(sample){
+    $("#genMsg").innerHTML=`<span class="thinking"><i></i><i></i><i></i>&nbsp;Writing cards…</span>`;
+    const ex=picked.map((p,i)=>`[${i+1}] (Topic: ${p.c.topic})\n${p.c.text}`).join("\n\n");
+    try{ const arr=await sample.json(`Make 8 exam-revision flashcards from ONLY these note excerpts. Fronts are specific questions (definitions, complexities, steps, comparisons, small numeric checks). Backs are 1-3 sentences, precise, may use **bold**.
+Reply with only a JSON array of {"front": string, "back": string, "topic": exact Topic label from the excerpt}. Example: [{"front":"What does DORA stand for in DHCP?","back":"**Discover, Offer, Request, Acknowledge**: the four DHCP messages.","topic":"DHCP"}]
+
+${ex}`,{modelTier:"quick", cache:false});
+      made=(Array.isArray(arr)?arr:[]).filter(x=>x&&x.front&&x.back).map(x=>({front:String(x.front), back:String(x.back), topic: picked.some(p=>p.c.topic===x.topic)?x.topic:picked[0].c.topic}));
+    }catch(e){ $("#genMsg").textContent=aiErr(e); }
+  }
+  if(!made.length){ made=picked.flatMap(p=>{ const ss=sentences(p.c.text); return ss.length?[{front:`Explain ${p.c.topic}: what is the key idea?`, back:ss.slice(0,2).join(" "), topic:p.c.topic}]:[]; }); }
+  made.forEach(m=>cards.push({id:uid(), ...m, subject, box:1, due:Date.now()}));
+  S.set("cards",cards); addLog("cards", `Made ${made.length} flashcards for ${topic==="all"?subject:topic}`);
+  $("#genMsg").textContent=`Added ${made.length} cards.`; btn.disabled=false; renderCards();
+};
+
+/* ---------------- boot ---------------- */
+buildIndex(); updateDue();
+const start = ["dash","lib","tutor","quiz","cards"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "dash";
+go(start);
+})();
+</script>

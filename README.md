@@ -2,7 +2,7 @@
 
 A GenAI + RAG personalised learning companion for SRM students. Upload your own syllabus units, notes and PYQs, then ask a tutor that answers from them with citations, quiz yourself, review flashcards, plan for exams and study in focused blocks while StudyMate tracks which topics need another pass.
 
-**v2.1** brings an animated "glow desk" design (a drifting colour-glow background, frosted glass panels, animated gradient hero, page transitions, light/dark themes and four accent colours) plus a planner, focus timer, gamification and a command palette.
+**v2.1** brings an animated "glow desk" design (a drifting colour-glow background, frosted glass panels, animated gradient hero, page transitions, one colourful theme with four colour worlds) plus a planner, focus timer, gamification and a command palette.
 
 ## Pipeline
 

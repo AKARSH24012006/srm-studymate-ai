@@ -13,11 +13,11 @@
   --accent:#ff5a3c; --accent-2:#ff9b2f; --accent-3:#ff3d7f; --accent-ink:#ffffff;
   --grad:linear-gradient(120deg,var(--accent),var(--accent-2));
   --accent-soft:color-mix(in srgb,var(--accent) 13%,transparent);
-  --accent-text:color-mix(in srgb,var(--accent) 82%,var(--ink));
+  --accent-text:color-mix(in srgb,var(--accent) 50%,#1a0b05);
   --b1:#ff7a59; --b2:#ffc04d; --b3:#22d3a3; --b4:#2bb6e0;
   --h1:#ffc04d; --h2:#2ed3a5; --h3:#38bdf8; --h4:#ff7a59; --h5:#a3e635; --h6:#fb7185; --hl-ink:#14110d;
   --h1s:rgba(255,192,77,.22); --h2s:rgba(46,211,165,.2); --h3s:rgba(56,189,248,.2); --h4s:rgba(255,122,89,.2); --h5s:rgba(163,230,53,.24); --h6s:rgba(251,113,133,.2);
-  --good:#0e9f6e; --good-soft:rgba(14,159,110,.14); --warn:#c27303; --warn-soft:rgba(245,158,11,.16); --bad:#e0314b; --bad-soft:rgba(224,49,75,.13);
+  --good:#06603f; --good-soft:rgba(14,159,110,.16); --warn:#7a4600; --warn-soft:rgba(245,158,11,.2); --bad:#a01a31; --bad-soft:rgba(224,49,75,.15);
   --shadow:0 1px 1px rgba(13,29,34,.04),0 14px 40px -18px rgba(13,29,34,.28);
   --glow:0 10px 30px -10px color-mix(in srgb,var(--accent) 70%,transparent);
   --ease:cubic-bezier(.2,.8,.2,1);
@@ -165,7 +165,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);
 .hero{position:relative;overflow:hidden;isolation:isolate;color:#fff;border-radius:28px;padding:28px 30px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:22px;align-items:center;
   background:linear-gradient(125deg,var(--accent) 0%,var(--accent-2) 35%,var(--accent-3) 70%,var(--accent) 100%);background-size:240% 240%;animation:flow 14s ease-in-out infinite;box-shadow:0 30px 70px -30px color-mix(in srgb,var(--accent) 75%,transparent)}
 @keyframes flow{0%,100%{background-position:0% 30%}50%{background-position:100% 70%}}
-.hero::after{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(120% 90% at 0% 0%,rgba(255,255,255,.22),transparent 55%),linear-gradient(180deg,transparent 40%,rgba(0,0,0,.14))}
+.hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(110,14,64,.5) 0%,rgba(110,14,64,.38) 55%,rgba(110,14,64,.34) 100%);mix-blend-mode:multiply}
 .orbs{position:absolute;inset:0;z-index:-1;pointer-events:none}
 .orbs i{position:absolute;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.55),rgba(255,255,255,0) 70%);filter:blur(2px);animation:float 12s ease-in-out infinite}
 .orbs i:nth-child(1){width:220px;height:220px;right:-40px;top:-70px}
@@ -176,7 +176,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);
 .hero h1{font-size:clamp(28px,3.6vw,42px);font-weight:800;letter-spacing:-.03em;max-width:20ch;text-shadow:0 2px 20px rgba(0,0,0,.12)}
 .hero h1 em{font-style:normal;display:inline-block;animation:wave 2.6s var(--ease) .4s both}
 @keyframes wave{0%{transform:translateY(10px) rotate(-3deg);opacity:0}60%{transform:translateY(-3px) rotate(1deg)}100%{transform:none;opacity:1}}
-.hero p{margin:8px 0 0;color:rgba(255,255,255,.88);max-width:52ch}
+.hero p{margin:8px 0 0;color:#fff;max-width:52ch;font-weight:500}
 .hero .eyebrow{color:rgba(255,255,255,.8)}
 .hero-side{position:relative;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
 .ring-svg{width:112px;height:112px;position:relative;flex:none}
@@ -187,10 +187,10 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);
 .ring-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
 .ring-c b{font-family:var(--f-display);font-size:26px}
 .ring-c small{font-size:10.5px;color:rgba(255,255,255,.8);font-family:var(--f-mono)}
-.next{display:flex;flex-direction:column;gap:8px;align-items:flex-start;min-width:0;max-width:270px}
+.next{display:flex;flex-direction:column;gap:8px;align-items:flex-start;min-width:0;max-width:270px;flex:1 1 170px}
 .next .btn.primary{background:#fff;color:#16110c;box-shadow:0 12px 30px -12px rgba(0,0,0,.45);white-space:normal;text-align:left}
 .next .btn.primary::after{background:linear-gradient(100deg,transparent,color-mix(in srgb,var(--accent) 25%,transparent),transparent)}
-.next small{color:rgba(255,255,255,.85)}
+.next small{color:#fff;font-weight:600;text-shadow:0 1px 8px rgba(0,0,0,.35)}
 .next .eyebrow{color:rgba(255,255,255,.8)}
 .lvl{display:flex;align-items:center;gap:10px;margin-top:16px;max-width:430px}
 .lvl .tag{font-family:var(--f-mono);font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.22);color:#fff;white-space:nowrap;border:1px solid rgba(255,255,255,.3)}
@@ -459,7 +459,9 @@ details.srcs[open] summary{margin-bottom:8px}
   .stat{padding:12px;gap:2px 10px}
   .stat .ic{width:36px;height:36px;border-radius:12px}
   .stat b{font-size:22px}
-  .ring-svg{width:96px;height:96px}
+  .ring-svg{width:84px;height:84px}
+  .ring-c b{font-size:21px}
+  .hero-side{gap:14px;flex-wrap:nowrap;align-items:flex-start}
 }
 
 /* ---------- teach it back ---------- */
@@ -496,6 +498,13 @@ details.srcs[open] summary{margin-bottom:8px}
 .jq span{flex:1 1 220px;min-width:0;font-weight:600}
 details.model summary{cursor:pointer;font-weight:700;list-style:none}
 details.model summary::-webkit-details-marker{display:none}
+
+/* ---------- deck browser ---------- */
+.deck-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.deck-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 13px;border-radius:15px;background:var(--sunk);border:1px solid var(--line)}
+.deck-row b{display:block;font-weight:600;overflow-wrap:anywhere}
+.deck-row .meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px;align-items:center}
+.deck-row p{margin:4px 0 0;color:var(--muted);font-size:13px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
 /* ---------- quick actions ---------- */
 .fab{position:fixed;z-index:35;right:max(24px,calc(env(safe-area-inset-right,0px) + 16px));bottom:calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:flex-end;gap:10px}
@@ -762,7 +771,7 @@ details.model summary::-webkit-details-marker{display:none}
       <div class="grid g-2" style="align-items:start">
         <div class="grid" style="gap:16px">
           <div class="card">
-            <div class="card-head"><h2>Deck</h2><span class="badge" id="deckTotal"></span></div>
+            <div class="card-head"><h2>Deck</h2><div class="chips" style="align-items:center"><span class="badge" id="deckTotal"></span><button class="btn sm soft" id="browseDeck" type="button">Browse &amp; edit</button></div></div>
             <div class="deck-stats" id="deckStats"></div>
             <div class="row" style="margin-top:14px">
               <label class="field">Subject<select id="cSubject"></select></label>
@@ -852,7 +861,7 @@ details.model summary::-webkit-details-marker{display:none}
 <div class="toast" id="toast" role="status" hidden></div>
 <canvas id="confetti" hidden></canvas>
 <div class="scrim" id="palScrim" hidden>
-  <div class="palette" role="dialog" aria-label="Search and commands">
+  <div class="palette" role="dialog" aria-modal="true" aria-label="Search and commands">
     <div class="pal-in"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" id="palInput" placeholder="Search notes, jump to a topic, or ask a doubt…" autocomplete="off"><kbd>Esc</kbd></div>
     <div class="pal-list" id="palList" role="listbox"></div>
     <div class="pal-foot"><span><kbd>↑</kbd> <kbd>↓</kbd> move</span><span><kbd>Enter</kbd> open</span><span>Type a question and press Enter to ask the tutor</span></div>
@@ -869,6 +878,7 @@ details.model summary::-webkit-details-marker{display:none}
 <script>
 (() => {
 "use strict";
+try{ document.documentElement.lang="en"; }catch(e){}
 /* ---------------- helpers & storage ---------------- */
 const S = {
   get(k, d){ try{ const v = localStorage.getItem("sm2."+k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
@@ -1196,7 +1206,7 @@ function go(v, opts={}){
   $$("[data-view]").forEach(b=>b.setAttribute("aria-current", b.dataset.view===v?"page":"false"));
   if(v==="dash") renderDash();
   if(v==="lib") renderLib();
-  if(v==="tutor"){ renderSubjectSelect($("#tSubject"), true); if(opts.subject) $("#tSubject").value=opts.subject; if(!chat.length) renderThread(); if(opts.ask){ ask(opts.ask); } else setTimeout(()=>{ if(matchMedia("(min-width:861px)").matches) $("#askBox").focus(); },50); }
+  if(v==="tutor"){ renderSubjectSelect($("#tSubject"), true); if(opts.subject) $("#tSubject").value=opts.subject; if(!chat.length || !$("#thread").children.length) renderThread(); if(opts.ask){ ask(opts.ask); } else setTimeout(()=>{ if(matchMedia("(min-width:861px)").matches) $("#askBox").focus(); },50); }
   if(v==="quiz"){ if(opts.topic || opts.subject){ stopQTimer(); quiz=null; renderQuizSetup(opts); if(opts.autostart) startQuiz(); } else if(!quiz) renderQuizSetup(); }
   if(v==="cards") renderCards();
   if(v==="plan") renderPlan();
@@ -1256,7 +1266,7 @@ function renderDash(){
   const s=streak();
   $("#heroSub").textContent = s>1 ? `You're on a ${s}-day streak. One short session today keeps it going.` : "Ask doubts from your own notes, test yourself, and let StudyMate track which topics need another pass.";
   $("#heroExtra").innerHTML = prof.name ? `<div class="lvl" id="lvlBar"><span class="tag" id="lvlTag"></span><div class="xpbar"><i></i></div><small id="lvlTxt"></small></div>`
-    : `<form class="onboard" id="onboard"><input type="text" id="obName" placeholder="What should StudyMate call you?" aria-label="Your name" maxlength="30"><button class="btn primary" type="submit" style="background:var(--h1);border-color:var(--h1);color:var(--hl-ink);box-shadow:none">Save</button></form><div class="lvl" id="lvlBar"><span class="tag" id="lvlTag"></span><div class="xpbar"><i></i></div><small id="lvlTxt"></small></div>`;
+    : `<form class="onboard" id="onboard"><input type="text" id="obName" placeholder="Your first name" aria-label="Your name" maxlength="30"><button class="btn primary" type="submit" style="background:var(--h1);border-color:var(--h1);color:var(--hl-ink);box-shadow:none">Save</button></form><div class="lvl" id="lvlBar"><span class="tag" id="lvlTag"></span><div class="xpbar"><i></i></div><small id="lvlTxt"></small></div>`;
   const ob=$("#onboard"); if(ob) ob.onsubmit=e=>{ e.preventDefault(); const n=$("#obName").value.trim(); if(!n) return; prof.name=n; saveProf(); renderDash(); toast(`Welcome, ${n}`); };
   renderHeroMeters();
   const next=nextAction();
@@ -1358,7 +1368,8 @@ async function readFile(f){
 function pstep(s, val, state){ const el=$(`.pstep[data-s="${s}"]`); el.className="pstep "+(state||""); if(val!=null) el.querySelector("b").textContent=val; }
 $("#addForm").addEventListener("submit", async e=>{
   e.preventDefault(); const btn=$("#addBtn"), msg=$("#addMsg");
-  const subject=$("#fSubject").value.trim(); if(!subject){ msg.textContent="Enter a subject name first."; return; }
+  const typed=$("#fSubject").value.trim().replace(/\s+/g," "); if(!typed){ msg.textContent="Enter a subject name first."; $("#fSubject").focus(); return; }
+  const subject=subjects().find(x=>x.toLowerCase()===typed.toLowerCase()) || typed;
   let text=$("#fText").value.trim();
   btn.disabled=true; ["parse","struct","chunk","index"].forEach(s=>pstep(s,"–",""));
   try{
@@ -1370,6 +1381,8 @@ $("#addForm").addEventListener("submit", async e=>{
     pstep("parse", text.length.toLocaleString(), "done"); await sleep(250);
     const title=$("#fTitle").value.trim() || $("#fUnit").value.trim() || "Notes";
     const doc=makeDoc({subject, unit:$("#fUnit").value, title, text});
+    const dup=docs.find(d=>d.subject===subject && d.chars===doc.chars && (d.chunks[0]?.text||"").slice(0,80)===(doc.chunks[0]?.text||"").slice(0,80));
+    if(dup){ msg.textContent=`This is already in ${subject} as “${dup.title}”, so it wasn't added again.`; pstep("parse",null,""); return; }
     pstep("struct", null, "run"); await sleep(200); pstep("struct", new Set(doc.chunks.map(c=>c.topic)).size, "done");
     pstep("chunk", null, "run"); await sleep(200); pstep("chunk", doc.chunks.length, "done");
     pstep("index", null, "run"); docs.push(doc); saveDocs(); buildIndex(); await sleep(200); pstep("index", IDX.df.size.toLocaleString(), "done");
@@ -1416,7 +1429,8 @@ $("#modalX").onclick=closeModal;
 $("#modalScrim").addEventListener("click", e=>{ if(e.target.id==="modalScrim") closeModal(); });
 
 /* ---------------- tutor ---------------- */
-let chat=[]; let mode="explain"; let askCtl=null;
+let chat=(S.get("chat",[])||[]).filter(m=>m && !m.pending && m.content); let mode="explain"; let askCtl=null;
+function saveChat(){ S.set("chat", chat.filter(m=>!m.pending && m.content).slice(-30)); }
 const MODES={
   explain:"Explain the concept clearly for a B.Tech student, with a short worked example where it helps. Use short paragraphs and bullets.",
   exam:"Write a well-structured university exam answer (about 13 marks): a one-line definition, then headed sections, key points as bullets, a small example or diagram description, and a 2-line conclusion.",
@@ -1438,6 +1452,7 @@ function renderThread(){
     $$(".suggest button", th).forEach(b=>b.onclick=()=>ask(b.textContent));
     return;
   }
+  saveChat();
   th.innerHTML=chat.map((m,i)=>m.role==="user"?`<div class="msg user"><div class="bubble">${esc(m.content)}</div></div>`:aiMsgHTML(m,i)).join("");
 }
 function aiMsgHTML(m,i){
@@ -1512,7 +1527,7 @@ $("#askBox").addEventListener("keydown", e=>{ if(e.key==="Enter" && !e.shiftKey)
 function autoGrow(){ const b=$("#askBox"); b.style.height="auto"; b.style.height=Math.min(180,b.scrollHeight)+"px"; }
 $("#askBox").addEventListener("input", autoGrow);
 $("#stopBtn").onclick=()=>askCtl?.abort();
-$("#clearChat").onclick=()=>{ askCtl?.abort(); chat=[]; renderThread(); $("#lastTrace").textContent="Ask something to see which passages were pulled."; };
+$("#clearChat").onclick=()=>{ askCtl?.abort(); chat=[]; saveChat(); renderThread(); $("#lastTrace").textContent="Ask something to see which passages were pulled."; };
 $("#tSubject").onchange=()=>{ if(!chat.length) renderThread(); };
 
 /* ---------------- quiz ---------------- */
@@ -1566,7 +1581,7 @@ Example: [{"q":"What is the worst-case time of quick sort?","options":["O(n)","O
 ${ex}`;
     quizCtl=new AbortController();
     try{ const arr=await sample.json(prompt,{signal:quizCtl.signal, cache:false});
-      qs=(Array.isArray(arr)?arr:[]).filter(x=>x&&x.q&&Array.isArray(x.options)&&x.options.length>=2&&Number.isInteger(+x.answer)&&+x.answer<x.options.length).slice(0,n).map(x=>{ const p=picked[(+x.source||1)-1]||picked[0]; const tp=allTopics(p.d.subject).some(t=>t.topic===x.topic)?x.topic:p.c.topic; return {q:String(x.q), options:x.options.map(String), answer:+x.answer, explain:String(x.explain||""), subject:p.d.subject, topic:tp, src:p.c.text}; });
+      qs=(Array.isArray(arr)?arr:[]).filter(x=>x&&x.q&&Array.isArray(x.options)&&x.options.length>=2&&Number.isInteger(+x.answer)&&+x.answer<x.options.length).slice(0,n).map(x=>{ const p=picked[(+x.source||1)-1]||picked[0]; const own=allTopics(p.d.subject).some(t=>t.topic===x.topic); const other=!own && picked.find(z=>z.c.topic===x.topic); const subj=other?other.d.subject:p.d.subject; const tp=own||other?String(x.topic):p.c.topic; const pool=topicPassages(subj,tp); const sp=pool.length?pool:[p]; const ans=String(x.options[+x.answer]??""); return {q:String(x.q), options:x.options.map(String), answer:+x.answer, explain:String(x.explain||""), subject:subj, topic:tp, src:bestSentence(sp, x.q+" "+ans+" "+(x.explain||"")) || sp[0].c.text}; });
       if(!qs.length) throw {code:"invalid_json"};
     }catch(e){ if(e?.code==="cancelled"){ btn.disabled=false; $("#qMsg").textContent=""; return; } $("#qMsg").textContent=aiErr(e)+" Using offline questions."; qs=null; await sleep(900); }
     quizCtl=null;
@@ -1600,7 +1615,7 @@ function renderQ(){
   const {qs,i,picks}=quiz; const q=qs[i]; const answered=picks[i]!=null;
   $("#quizBox").innerHTML=`<div class="qprog">${qs.map((_,j)=>`<i class="${picks[j]!=null?(picks[j]===qs[j].answer?"ok":"no"):j===i?"cur":""}"></i>`).join("")}</div>
   <div class="card raised" style="display:flex;flex-direction:column;gap:16px">
-    <div class="row" style="justify-content:space-between;align-items:center"><span class="eyebrow fit">Question ${i+1} of ${qs.length}</span><span class="subj fit" style="${sVars(q.subject)}">${esc(q.topic)}</span></div>
+    <div class="row" style="justify-content:space-between;align-items:center"><span class="eyebrow fit">Question ${i+1} of ${qs.length}</span><span class="chips fit" style="align-items:center"><span class="subj" style="${sVars(q.subject)}">${esc(q.topic)}</span><button class="btn sm ghost" type="button" id="qQuit" aria-label="End this quiz">End quiz</button></span></div>
     ${quiz.timed && !answered?`<div class="qtimer"><i id="qtBar" style="width:100%"></i></div>`:""}
     <div class="qtext">${esc(q.q)}</div>
     <div class="opts">${q.options.map((o,j)=>`<button class="opt ${answered?(j===q.answer?"right":j===picks[i]?"wrong":""):""}" data-j="${j}" ${answered?"disabled":""} type="button"><span class="k">${j+1}</span><span>${esc(o)}</span></button>`).join("")}</div>
@@ -1608,6 +1623,7 @@ function renderQ(){
     <div class="row" style="justify-content:flex-end"><button class="btn primary" id="qNext" type="button">${i+1<qs.length?"Next question":"See results"} <kbd style="background:transparent;color:inherit;border-color:currentColor">Enter</kbd></button></div>`:""}
   </div>`;
   $$(".opt").forEach(b=>b.onclick=()=>pickAnswer(+b.dataset.j));
+  $("#qQuit").onclick=()=>{ const done=quiz.picks.filter(x=>x!=null).length; if(done){ quiz.qs=quiz.qs.slice(0,done); quiz.picks=quiz.picks.slice(0,done); finishQuiz(); toast(`Quiz ended. ${done} answered question${done>1?"s":""} counted.`); } else { stopQTimer(); quiz=null; renderQuizSetup(); toast("Quiz ended"); } };
   const nx=$("#qNext"); if(nx){ nx.onclick=nextQ; nx.focus({preventScroll:true}); }
   if(quiz.timed && !answered){ stopQTimer(); let left=45; const bar=$("#qtBar");
     qTimer=setInterval(()=>{ left--; if(bar) bar.style.width=(left/45*100)+"%"; if(left<=0){ pickAnswer(-1); } },1000); }
@@ -1646,7 +1662,7 @@ function renderCards(){
   renderReview(); updateDue();
 }
 function renderReview(){
-  const due=cards.filter(c=>c.due<=Date.now()).sort((a,b)=>a.box-b.box||a.due-b.due);
+  const due=cards.filter(c=>c.due<=Date.now()).sort((a,b)=>a.due-b.due||a.box-b.box);
   const box=$("#reviewBox");
   if(!due.length){ curCard=null;
     const nextDue=cards.length?Math.min(...cards.map(c=>c.due)):null;
@@ -1659,7 +1675,7 @@ function renderReview(){
     <div class="face back"><span class="eyebrow">Answer</span><div class="prose">${md(c.back)}</div></div>
   </div></div>
   <div class="rate" id="rate" hidden>
-    <button class="btn" data-r="again" type="button" style="color:var(--bad)">Again<small>1 · today</small></button>
+    <button class="btn" data-r="again" type="button" style="color:var(--bad)">Again<small>1 · later today</small></button>
     <button class="btn" data-r="good" type="button" style="color:var(--warn)">Good<small>2 · ${GAPS[Math.min(5,c.box+1)]}d</small></button>
     <button class="btn" data-r="easy" type="button" style="color:var(--good)">Easy<small>3 · ${GAPS[Math.min(5,c.box+2)]}d</small></button>
   </div>`;
@@ -1668,7 +1684,7 @@ function renderReview(){
 }
 function flipCard(){ const f=$("#flip"); if(!f) return; flipped=!flipped; f.classList.toggle("on",flipped); $("#rate").hidden=!flipped; }
 function rate(c,r){
-  if(r==="again"){ c.box=1; c.due=Date.now()+60e3; } else { c.box=Math.min(5,c.box+(r==="easy"?2:1)); c.due=Date.now()+GAPS[c.box]*DAY; }
+  if(r==="again"){ c.box=1; c.due=Date.now(); } else { c.box=Math.min(5,c.box+(r==="easy"?2:1)); c.due=Date.now()+GAPS[c.box]*DAY; }
   updateMastery(c.subject,c.topic, r==="again"?0:r==="good"?.75:1);
   S.set("cards",cards); addLog("cards", `Reviewed a ${c.topic} card: ${r}`); bump("reviews"); award(3); renderCards();
 }
@@ -1694,13 +1710,31 @@ ${ex}`,{modelTier:"quick", cache:false});
 function openCardModal(pref={}){
   const subs=subjects(); if(!subs.length){ toast("Add notes first so the card has a subject."); return; }
   const sub0=pref.subject && subs.includes(pref.subject) ? pref.subject : ($("#cSubject").value && subs.includes($("#cSubject").value) ? $("#cSubject").value : subs[0]);
-  openModal({title:"Write a flashcard", body:`<form id="mcForm" class="grid" style="gap:12px"><label class="field">Front (question)<input type="text" id="mcFront" required placeholder="e.g. What is the subnet mask for /26?"></label><label class="field">Back (answer)<textarea id="mcBack" required style="min-height:90px" placeholder="255.255.255.192 · 64 addresses, 62 usable hosts"></textarea></label><div class="row"><label class="field">Subject<select id="mcSubject">${subs.map(s=>`<option ${s===sub0?"selected":""}>${esc(s)}</option>`).join("")}</select></label><label class="field">Topic<select id="mcTopic"></select></label></div></form>`, foot:`<button class="btn ghost" type="button" id="mcCancel">Cancel</button><button class="btn primary" type="submit" form="mcForm">Add card</button>`});
+  openModal({title:pref.id?"Edit flashcard":"Write a flashcard", body:`<form id="mcForm" class="grid" style="gap:12px"><label class="field">Front (question)<input type="text" id="mcFront" required placeholder="e.g. What is the subnet mask for /26?"></label><label class="field">Back (answer)<textarea id="mcBack" required style="min-height:90px" placeholder="255.255.255.192 · 64 addresses, 62 usable hosts"></textarea></label><div class="row"><label class="field">Subject<select id="mcSubject">${subs.map(s=>`<option ${s===sub0?"selected":""}>${esc(s)}</option>`).join("")}</select></label><label class="field">Topic<select id="mcTopic"></select></label></div></form>`, foot:`<button class="btn ghost" type="button" id="mcCancel">Cancel</button><button class="btn primary" type="submit" form="mcForm">${pref.id?"Save card":"Add card"}</button>`});
   $("#mcFront").value=pref.front||""; $("#mcBack").value=pref.back||"";
   const fill=()=>{ const tps=allTopics($("#mcSubject").value); $("#mcTopic").innerHTML=tps.map(t=>`<option ${t.topic===pref.topic?"selected":""}>${esc(t.topic)}</option>`).join(""); }; fill(); $("#mcSubject").onchange=fill;
   $("#mcCancel").onclick=closeModal; (pref.front?$("#mcBack"):$("#mcFront")).focus();
-  $("#mcForm").onsubmit=e=>{ e.preventDefault(); const f=$("#mcFront").value.trim(), bk=$("#mcBack").value.trim(); if(!f||!bk) return; const subject=$("#mcSubject").value; cards.push({id:uid(), front:f, back:bk, subject, topic:$("#mcTopic").value||subject, box:1, due:Date.now()}); S.set("cards",cards); closeModal(); updateDue(); if(view==="cards") renderCards(); toast("Card added"); };
+  $("#mcForm").onsubmit=e=>{ e.preventDefault(); const f=$("#mcFront").value.trim(), bk=$("#mcBack").value.trim(); if(!f||!bk) return; const subject=$("#mcSubject").value; const topic=$("#mcTopic").value||subject;
+    const ex=pref.id && cards.find(c=>c.id===pref.id);
+    if(ex) Object.assign(ex,{front:f, back:bk, subject, topic}); else cards.push({id:uid(), front:f, back:bk, subject, topic, box:1, due:Date.now()});
+    S.set("cards",cards); closeModal(); updateDue(); if(view==="cards") renderCards(); toast(ex?"Card saved":"Card added"); if(pref.back2deck) setTimeout(browseDeck,50); };
 }
 $("#addCardBtn").onclick=()=>openCardModal({topic:$("#cTopic").value});
+function browseDeck(q=""){
+  const due=c=>c.due<=Date.now()?"Due now":`Due ${new Date(c.due).toLocaleDateString(undefined,{day:"numeric",month:"short"})}`;
+  openModal({title:`Your deck · ${cards.length} card${cards.length!==1?"s":""}`, body:`<input type="text" id="deckQ" placeholder="Search cards, subjects or topics" aria-label="Search cards"><div class="deck-list" id="deckList"></div>`, foot:`<button class="btn" type="button" id="deckNew">${icon("plus")} Write a card</button><button class="btn primary" type="button" id="deckDone">Done</button>`});
+  const draw=()=>{ const t=$("#deckQ").value.trim().toLowerCase();
+    const list=cards.filter(c=>!t || [c.front,c.back,c.subject,c.topic].join(" ").toLowerCase().includes(t)).sort((a,b)=>a.due-b.due);
+    $("#deckList").innerHTML=list.length ? list.slice(0,200).map(c=>`<div class="deck-row" data-cid="${c.id}"><div style="min-width:0"><b>${esc(c.front)}</b><p>${esc(plain(c.back))}</p><div class="meta">${subjTag(c.subject)}<span class="badge">Box ${c.box}</span><span class="badge ${c.due<=Date.now()?"acc":""}">${due(c)}</span></div></div><div class="chips"><button class="btn sm ghost" type="button" data-ce>Edit</button><button class="btn sm ghost danger" type="button" data-cdel>Delete</button></div></div>`).join("")
+      : `<div class="empty">${cards.length?"No cards match that search.":"No cards yet. Write one, or make a set from your notes."}</div>`; };
+  $("#deckQ").value=q; draw(); $("#deckQ").oninput=draw; $("#deckQ").focus();
+  $("#deckDone").onclick=closeModal; $("#deckNew").onclick=()=>{ closeModal(); setTimeout(()=>openCardModal({back2deck:true}),30); };
+  $("#deckList").onclick=e=>{ const row=e.target.closest("[data-cid]"); if(!row) return; const c=cards.find(x=>x.id===row.dataset.cid); if(!c) return;
+    if(e.target.closest("[data-ce]")){ closeModal(); setTimeout(()=>openCardModal({...c, back2deck:true}),30); }
+    if(e.target.closest("[data-cdel]")){ const i=cards.indexOf(c); cards.splice(i,1); S.set("cards",cards); updateDue(); draw(); if(view==="cards") renderCards();
+      toast("Card deleted",{undo:()=>{ cards.splice(Math.min(i,cards.length),0,c); S.set("cards",cards); updateDue(); if(view==="cards") renderCards(); if(!$("#modalScrim").hidden && $("#deckList")) draw(); toast("Card restored"); }}); } };
+}
+$("#browseDeck").onclick=()=>browseDeck();
 
 /* ---------------- planner: exams ---------------- */
 function examPlan(ex){
@@ -1795,7 +1829,7 @@ $("#sAccent").addEventListener("click", e=>{ const b=e.target.closest("[data-ac]
 $("#sSize").addEventListener("click", e=>{ const b=e.target.closest("[data-sz]"); if(!b) return; prof.size=b.dataset.sz; saveProf(); applyLook(); renderSettings(); movePill(); });
 $("#sCalm").addEventListener("change", e=>{ prof.calm=e.target.checked; saveProf(); applyLook(); toast(prof.calm?"Calm motion on":"Animations back on"); });
 $("#sGoal").addEventListener("click", e=>{ const b=e.target.closest("[data-goal]"); if(!b) return; prof.goal=+b.dataset.goal; saveProf(); renderSettings(); });
-const KEYS=["docs","mastery","cards","log","prof","xp","stats","exams","sessions","badges","quizPrev","tmode","teachHist","teachDrafts","teachLast","guideHidden"];
+const KEYS=["docs","mastery","cards","log","prof","xp","stats","exams","sessions","badges","quizPrev","tmode","teachHist","teachDrafts","teachLast","guideHidden","chat"];
 function backupJSON(){ const o={app:"srm-studymate", version:2, exported:new Date().toISOString()}; KEYS.forEach(k=>o[k]=S.get(k,null)); return JSON.stringify(o); }
 $("#exportBtn").onclick=()=>saveFile(`studymate_backup_${todayKey()}.json`, backupJSON(), "application/json");
 $("#copyBackup").onclick=()=>copyText(backupJSON());
@@ -1812,8 +1846,13 @@ $("#resetBtn").onclick=e=>{ const b=e.currentTarget;
 
 /* ---------------- command palette ---------------- */
 let palItems=[], palSel=0;
-function openPalette(prefill=""){ $("#palScrim").hidden=false; const i=$("#palInput"); i.value=prefill; renderPal(); i.focus(); }
-function closePalette(){ $("#palScrim").hidden=true; }
+let palFocus=null;
+function openPalette(prefill=""){ palFocus=document.activeElement; $("#palScrim").hidden=false; const i=$("#palInput"); i.value=prefill; renderPal(); i.focus(); }
+function closePalette(){ $("#palScrim").hidden=true; palFocus?.focus?.(); }
+function trapFocus(e, root){ if(e.key!=="Tab") return; const f=[...root.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])')].filter(el=>!el.disabled && el.offsetParent!==null); if(!f.length) return;
+  const first=f[0], last=f[f.length-1]; if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); } else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); } }
+$("#modalScrim").addEventListener("keydown", e=>trapFocus(e, $("#modalScrim .modal")));
+$("#palScrim").addEventListener("keydown", e=>trapFocus(e, $("#palScrim .palette")));
 function palActions(){
   return [
     {g:"Go to", ic:"home", l:"Home", run:()=>go("dash")},
@@ -1823,6 +1862,7 @@ function palActions(){
     {g:"Go to", ic:"quiz", l:"New quiz", run:()=>{ quiz=null; go("quiz"); }},
     {g:"Actions", ic:"bolt", l:"Quick quiz", s:"5 questions on your weak spots", run:quickQuiz},
     {g:"Actions", ic:"plus", l:"Write a flashcard", run:()=>openCardModal()},
+    {g:"Actions", ic:"cards", l:"Browse or edit flashcards", s:`${cards.length} cards`, run:()=>browseDeck()},
     {g:"Go to", ic:"cards", l:"Review flashcards", s:`${cards.filter(c=>c.due<=Date.now()).length} due`, run:()=>go("cards")},
     {g:"Go to", ic:"plan", l:"Exam planner", run:()=>go("plan")},
     {g:"Actions", ic:"clock", l:T.running?"Pause focus timer":"Start a focus block", s:fmt(T.left), run:()=>{ T.running?pauseTimer():startTimer(); go("plan"); }},
@@ -2035,6 +2075,7 @@ Use an empty array when a list has nothing. Do not invent mistakes.`;
   }
   r.peeked=peeked; r.words=words;
   updateMastery(subject, topic, r.score/100);
+  const opt=[...$("#teTopic").options].find(x=>x.value===topic); if(opt) opt.textContent=`${topic} · ${Math.round(mastery[key(subject,topic)].m*100)}%`;
   bump("teach"); if(r.score>=90) bump("teachAce");
   teachHist.unshift({t:Date.now(), subject, topic, score:r.score}); teachHist=teachHist.slice(0,40); S.set("teachHist",teachHist);
   addLog("teach", `Taught back ${topic}: ${r.score}/100`); award(10+Math.round(r.score/10));
